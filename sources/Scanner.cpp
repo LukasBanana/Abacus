@@ -26,8 +26,10 @@ bool Scanner::Scan(const std::shared_ptr<ExprStream>& stream)
         /* Store source stream and take first character */
         stream_ = stream;
         TakeIt();
+        succeeded_ = true;
         return true;
     }
+    succeeded_ = false;
     return false;
 }
 
@@ -38,6 +40,7 @@ TokenPtr Scanner::Next()
         try
         {
             /* Scan next token */
+            IgnoreWhiteSpaces();
             return ScanToken();
         }
         catch (const std::exception& err)
@@ -45,6 +48,7 @@ TokenPtr Scanner::Next()
             /* Add to error and scan next token */
             if (log_)
                 log_->Error(err.what());
+            succeeded_ = false;
         }
     }
 
@@ -111,7 +115,12 @@ void Scanner::Ignore(const std::function<bool (char)>& pred)
 
 void Scanner::IgnoreWhiteSpaces()
 {
-    Ignore([](char chr) { return std::isspace(static_cast<unsigned char>(chr)) != 0; });
+    Ignore(
+        [](char chr)
+        {
+            return chr == ' ' || chr == '\t';
+        }
+    );
 }
 
 TokenPtr Scanner::Make(const Token::Types& type, bool takeChr)
@@ -159,16 +168,19 @@ TokenPtr Scanner::ScanToken()
         case '*': return Make(Token::Types::MulOp, true);
         case '/': return Make(Token::Types::DivOp, true);
         case '^': return Make(Token::Types::PowOp, true);
+        case ',': return Make(Token::Types::Comma, true);
     }
 
     if (Is('<') || Is('>'))
         return ScanShiftOperator(chr_);
-
+        
     /* Scan punctuation, special characters and brackets */
     if (Is('('))
         return Make(Token::Types::OpenBracket, true);
     if (Is(')'))
         return Make(Token::Types::CloseBracket, true);
+    if (Is('\n'))
+        return Make(Token::Types::EndOfStream, true);
 
     ErrorUnexpected();
 
@@ -183,10 +195,10 @@ TokenPtr Scanner::ScanIdentifier()
 
     while (std::isalnum(UChr()) || Is('_'))
         spell += TakeIt();
-
+        
     /* Scan reserved words */
     if (spell == "mod")
-        return Make(Token::Types::OpenBracket, spell);
+        return Make(Token::Types::DivOp, spell);
 
     /* Return as identifier */
     return Make(Token::Types::Ident, spell);

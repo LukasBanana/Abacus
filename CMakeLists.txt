@@ -12,6 +12,7 @@ set(EXECUTABLE_OUTPUT_PATH ${OUTPUT_DIR} CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIR} CACHE PATH "Build directory" FORCE)
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(PROJECT_SOURCES_DIR "${PROJECT_SOURCE_DIR}/sources")
+set(PROJECT_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 
 
 # === Global files ===
@@ -32,10 +33,10 @@ include_directories("${PROJECT_INCLUDE_DIR}")
 add_library(abacuslib STATIC ${FilesAll})
 set_target_properties(abacuslib PROPERTIES LINKER_LANGUAGE CXX DEBUG_POSTFIX "D")
 
-#add_executable(abacus "${PROJECT_TEST_DIR}/test1.cpp")
-#set_target_properties(abacus PROPERTIES LINKER_LANGUAGE CXX DEBUG_POSTFIX "D")
+add_executable(test1 "${PROJECT_TEST_DIR}/test1.cpp")
+set_target_properties(test1 PROPERTIES LINKER_LANGUAGE CXX DEBUG_POSTFIX "D")
 
-#target_link_libraries(abacus abacuslib)
+target_link_libraries(test1 abacuslib)
 
 
 

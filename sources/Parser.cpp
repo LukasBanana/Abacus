@@ -27,7 +27,12 @@ std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
 
     try
     {
-        return ParseExpr();
+        auto ast = ParseExpr();
+        
+        if (!scanner_.HasSucceeded())
+            return nullptr;
+
+        return ast;
     }
     catch (const std::exception& err)
     {
@@ -90,27 +95,10 @@ TokenPtr Parser::AcceptIt()
 
 BinaryExpr::Operators Parser::GetBinaryOperator(const std::string& spell)
 {
-    using Op = BinaryExpr::Operators;
-
-    if (spell == "+")
-        return Op::Add;
-    if (spell == "-")
-        return Op::Sub;
-    if (spell == "*")
-        return Op::Mul;
-    if (spell == "/")
-        return Op::Div;
-    if (spell == "mod")
-        return Op::Mod;
-    if (spell == "^")
-        return Op::Pow;
-    if (spell == "<<")
-        return Op::LShift;
-    if (spell == ">>")
-        return Op::RShift;
-
-    Error("invalid binary operator: " + spell);
-    return Op::Add;
+    auto op = BinaryExpr::GetOperator(spell);
+    if (op == BinaryExpr::Operators::__Unknown__)
+        Error("invalid binary operator: " + spell);
+    return op;
 }
 
 ExprPtr Parser::ParseExpr()
@@ -231,9 +219,31 @@ ExprPtr Parser::ParseUnaryExpr()
 
 ExprPtr Parser::ParseIdentExpr()
 {
-    auto ast = Make<IdentExpr>();
+    auto value = Accept(Tokens::Ident)->Spell();
 
-    ast->value = Accept(Tokens::Ident)->Spell();
+    if (!Is(Tokens::OpenBracket))
+    {
+        /* Create identifier expression */
+        auto ast = Make<IdentExpr>();
+
+        ast->value = value;
+
+        return ast;
+    }
+
+    /* Create function expression */
+    return ParseFuncExpr(std::move(value));
+}
+
+ExprPtr Parser::ParseFuncExpr(std::string&& name)
+{
+    auto ast = Make<FuncExpr>();
+
+    ast->name = name;
+
+    Accept(Tokens::OpenBracket);
+    ast->args = ParseExprList();
+    Accept(Tokens::CloseBracket);
 
     return ast;
 }
@@ -264,6 +274,22 @@ ExprPtr Parser::BuildBinaryExprTree(std::vector<ExprPtr>& exprs, std::vector<Bin
     }
 
     return exprs.front();
+}
+
+std::vector<ExprPtr> Parser::ParseExprList()
+{
+    std::vector<ExprPtr> exprList;
+
+    while (true)
+    {
+        exprList.push_back(ParseExpr());
+        if (Is(Tokens::Comma))
+            AcceptIt();
+        else
+            break;
+    }
+
+    return exprList;
 }
 
 

@@ -9,11 +9,13 @@
 #define __AC_AST_H__
 
 
+#include "Export.h"
 #include "Visitor.h"
 #include "StreamPosition.h"
 
 #include <string>
 #include <memory>
+#include <vector>
 
 
 namespace Ac
@@ -42,6 +44,7 @@ struct Expr
         Binary,
         Literal,
         Ident,
+        Func,
     };
 
     Expr(const StreamPosition& pos) :
@@ -67,8 +70,12 @@ struct UnaryExpr : public Expr
 
     enum class Operators
     {
+        __Unknown__,
         Negate,
     };
+
+    static AC_EXPORT Operators GetOperator(const std::string& spell);
+    static AC_EXPORT std::string GetOperatorSpell(const Operators op);
 
     std::shared_ptr<Expr>   expr;
     Operators               op = Operators::Negate;
@@ -80,6 +87,7 @@ struct BinaryExpr : public Expr
 
     enum class Operators
     {
+        __Unknown__,
         Add,
         Sub,
         Mul,
@@ -89,6 +97,9 @@ struct BinaryExpr : public Expr
         LShift,
         RShift,
     };
+
+    static AC_EXPORT Operators GetOperator(const std::string& spell);
+    static AC_EXPORT std::string GetOperatorSpell(const Operators op);
 
     std::shared_ptr<Expr>   exprL;
     Operators               op = Operators::Add;
@@ -108,6 +119,14 @@ struct IdentExpr : public Expr
     __AC_AST_INTERFACE__(Ident);
 
     std::string value;
+};
+
+struct FuncExpr : public Expr
+{
+    __AC_AST_INTERFACE__(Func);
+
+    std::string             name;
+    std::vector<ExprPtr>    args;
 };
 
 

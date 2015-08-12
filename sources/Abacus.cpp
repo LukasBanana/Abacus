@@ -20,7 +20,7 @@ AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log)
 {
     /* Setup input stream */
     auto stream = std::make_shared<std::stringstream>();
-    *stream << expr;
+    *stream << expr << '\n';
 
     /* Parse expression */
     Parser parser(log);

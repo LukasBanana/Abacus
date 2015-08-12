@@ -20,6 +20,7 @@ struct UnaryExpr;
 struct BinaryExpr;
 struct LiteralExpr;
 struct IdentExpr;
+struct FuncExpr;
 
 class Visitor
 {
@@ -30,10 +31,11 @@ class Visitor
         {
         }
 
-        void VisitUnaryExpr     ( UnaryExpr*    ast, void* args );
-        void VisitBinaryExpr    ( BinaryExpr*   ast, void* args );
-        void VisitLiteralExpr   ( LiteralExpr*  ast, void* args );
-        void VisitIdentExpr     ( IdentExpr*    ast, void* args );
+        virtual void VisitUnaryExpr     ( UnaryExpr*    ast, void* args ) = 0;
+        virtual void VisitBinaryExpr    ( BinaryExpr*   ast, void* args ) = 0;
+        virtual void VisitLiteralExpr   ( LiteralExpr*  ast, void* args ) = 0;
+        virtual void VisitIdentExpr     ( IdentExpr*    ast, void* args ) = 0;
+        virtual void VisitFuncExpr      ( FuncExpr*     ast, void* args ) = 0;
 
     protected:
 

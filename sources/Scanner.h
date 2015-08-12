@@ -39,9 +39,15 @@ class Scanner
         StreamPosition Pos() const;
 
         //! Returns the current expression stream.
-        inline ExprStream* GetSource() const
+        ExprStream* GetSource() const
         {
             return stream_.get();
+        }
+
+        //! Returns true if the previous scanning process (since "Scan" was called) has succeeded.
+        bool HasSucceeded() const
+        {
+            return succeeded_;
         }
 
     private:
@@ -90,6 +96,8 @@ class Scanner
 
         std::shared_ptr<ExprStream> stream_;
         char                        chr_ = 0;
+
+        bool                        succeeded_ = false;
 
 };
 

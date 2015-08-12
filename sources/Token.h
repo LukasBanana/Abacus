@@ -36,10 +36,11 @@ class Token
             AddOp,          //!< +
             SubOp,          //!< -
             MulOp,          //!< *
-            DivOp,          //!< /
-            ModOp,          //!< mod
+            DivOp,          //!< /, mod
             PowOp,          //!< ^
             ShiftOp,        //!< <<, >>
+
+            Comma,          //!< ,
             
             OpenBracket,    //!< (
             CloseBracket,   //!< )

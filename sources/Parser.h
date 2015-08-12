@@ -110,7 +110,11 @@ class Parser
         ExprPtr ParseUnaryExpr();
         ExprPtr ParseIdentExpr();
 
+        ExprPtr ParseFuncExpr(std::string&& name);
+
         ExprPtr BuildBinaryExprTree(std::vector<ExprPtr>& exprs, std::vector<BinaryExpr::Operators>& ops);
+
+        std::vector<ExprPtr> ParseExprList();
 
         /* === Members === */
 

@@ -18,12 +18,15 @@ shift_expr:			value_expr (('<<' | '>>') value_expr)*;
 value_expr			: literal_expr
 					| ident_expr
 					| bracket_expr
-					| unary_expr;
+					| unary_expr
+					| func_expr;
 
 ident_expr:			IDENT;
 literal_expr:		INT_LITERAL | FLOAT_LITERAL;
 bracket_expr:		'(' expr ')';
 unary_expr:			'-' value_expr;
+func_expr:			IDENT '(' expr_list? ')';
+expr_list:			expr (',' expr)*;
 
 BIN_DIGIT:	[01];
 OCT_DIGIT:	[0-7];
