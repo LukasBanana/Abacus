@@ -1,5 +1,5 @@
-Abacus - A simple mathematical expression parser with calculator interface
-==========================================================================
+Abacus - Simple mathematical expression parser with calculator interface and arbitrary precision
+================================================================================================
 
 License
 -------
@@ -10,6 +10,8 @@ Status
 ------
 
 **Alpha**
+
+Todo: Small UI with Qt or wxWidgets
 
 Dependencies
 ------------
@@ -24,12 +26,24 @@ Example
 #include <Abacus/Abacus.h>
 #include <iostream>
 
+class Log : public Ac::Log
+{
+public:
+    void Error(const std::string& s) override
+    {
+        std::cerr << s << std::endl;
+    }
+};
+
 int main()
 {
-    Ac::ComputeState state;
+    Log log;
+    Ac::ConstantsSet constantsSet;
     
-    std::cout << Ac::Compute("x = 12", &state) << std::endl;
-    std::cout << Ac::Compute("3 + 2*(pi^-e - sqrt(log2(x*5)))", &state) << std::endl;
+    Ac::SetFloatPrecision(50);
+    
+    std::cout << Ac::Compute("x = 12", constantsSet, &log) << std::endl;
+    std::cout << Ac::Compute("3 + 2*(pi^-e - sqrt(log2(x*5)))", constantsSet, &log) << std::endl;
 
     return 0;
 }
