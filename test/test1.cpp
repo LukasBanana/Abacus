@@ -114,7 +114,7 @@ int main()
     std::cout << std::endl << "computing:" << std::endl << "----------" << std::endl;
 
     auto expr =
-        "3"
+        "0 mod 50"
     ;
 
     std::cout << expr << " = " << Compute(expr, constants, &log) << std::endl;

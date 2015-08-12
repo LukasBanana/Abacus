@@ -53,7 +53,14 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
     auto value = Pop();
 
     /* Compute unary operation */
-    //todo...
+    using Op = UnaryExpr::Operators;
+
+    switch (ast->op)
+    {
+        case Op::Negate:
+            value.Negate();
+            break;
+    }
 
     /* Push result onto stack */
     Push(value);
@@ -69,10 +76,38 @@ void Computer::VisitBinaryExpr(BinaryExpr* ast, void* args)
     auto valueR = Pop();
 
     /* Compute binary operation */
-    //todo...
+    using Op = BinaryExpr::Operators;
+
+    switch (ast->op)
+    {
+        case Op::Add:
+            valueL.Add(valueR);
+            break;
+        case Op::Sub:
+            valueL.Sub(valueR);
+            break;
+        case Op::Mul:
+            valueL.Mul(valueR);
+            break;
+        case Op::Div:
+            valueL.Div(valueR);
+            break;
+        case Op::Mod:
+            valueL.Mod(valueR);
+            break;
+        case Op::Pow:
+            valueL.Pow(valueR);
+            break;
+        case Op::LShift:
+            valueL.LShift(valueR);
+            break;
+        case Op::RShift:
+            valueL.RShift(valueR);
+            break;
+    }
 
     /* Push result onto stack */
-    Push(valueL);//!!!!!!!!
+    Push(valueL);
 }
 
 void Computer::VisitLiteralExpr(LiteralExpr* ast, void* args)
@@ -105,8 +140,7 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
     auto f = ast->name;
 
     //if (f == "sin")
-
-
+    //todo...
 }
 
 void Computer::Push(const Value& value)
@@ -134,11 +168,110 @@ Computer::Value::Value(const std::string& value, bool isFloat) :
     if (isFloat_)
         fprec_ = float_precision(value.c_str());
     else
+        iprec_ = int_precision(value.c_str());
+}
+
+void Computer::Value::Add(Value& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+        fprec_ += rhs.fprec_;
+    else
+        iprec_ += rhs.iprec_;
+}
+
+void Computer::Value::Sub(Value& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+        fprec_ -= rhs.fprec_;
+    else
+        iprec_ -= rhs.iprec_;
+}
+
+void Computer::Value::Mul(Value& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+        fprec_ *= rhs.fprec_;
+    else
+        iprec_ *= rhs.iprec_;
+}
+
+void Computer::Value::Div(Value& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+        fprec_ /= rhs.fprec_;
+    else
+        iprec_ /= rhs.iprec_;
+}
+
+void Computer::Value::Mod(Value& rhs)
+{
+    ToInt();
+    rhs.ToInt();
+
+    iprec_ %= rhs.iprec_;
+
+    if (iprec_ < "0")
+        iprec_ += rhs.iprec_;
+}
+
+void Computer::Value::Pow(Value& rhs)
+{
+    ToFloat();
+    rhs.ToFloat();
+    fprec_ = pow(fprec_, rhs.fprec_);
+}
+
+void Computer::Value::LShift(Value& rhs)
+{
+    ToInt();
+    rhs.ToInt();
+    iprec_ <<= rhs.iprec_;
+}
+
+void Computer::Value::RShift(Value& rhs)
+{
+    ToInt();
+    rhs.ToInt();
+    iprec_ >>= rhs.iprec_;
+}
+
+void Computer::Value::ToFloat()
+{
+    if (!isFloat_)
     {
-        std::vector<char> s(value.size() + 1);
-        memcpy(s.data(), value.c_str(), value.size() + 1);
-        iprec_ = int_precision(s.data());
+        auto ival = iprec_.toString();
+        fprec_ = float_precision(ival.c_str());
+        isFloat_ = true;
     }
+}
+
+void Computer::Value::ToInt()
+{
+    if (isFloat_)
+    {
+        iprec_ = fprec_.to_int_precision();
+        isFloat_ = false;
+    }
+}
+
+void Computer::Value::Unify(Value& rhs)
+{
+    if (isFloat_ && !rhs.isFloat_)
+        rhs.ToFloat();
+    else if (!isFloat_ && rhs.isFloat_)
+        ToFloat();
+}
+
+void Computer::Value::Negate()
+{
+    if (isFloat_)
+        fprec_ = -fprec_;
+    else
+        iprec_ = -iprec_;
 }
 
 Computer::Value::operator std::string ()

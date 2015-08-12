@@ -39,6 +39,22 @@ class Computer : private Visitor
                 
                 Value(const std::string& value, bool isFloat = false);
 
+                void Add(Value& rhs);
+                void Sub(Value& rhs);
+                void Mul(Value& rhs);
+                void Div(Value& rhs);
+                void Mod(Value& rhs);
+                void Pow(Value& rhs);
+                void LShift(Value& rhs);
+                void RShift(Value& rhs);
+
+                void ToFloat();
+                void ToInt();
+
+                void Unify(Value& rhs);
+
+                void Negate();
+
                 operator std::string ();
 
             private:
