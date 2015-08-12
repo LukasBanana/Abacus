@@ -251,7 +251,7 @@ class int_precision
       int_precision( unsigned int );    // When initialized through an unsigned int
       int_precision( long );            // When initialized through an long
       int_precision( unsigned long );   // When initialized through an unsigned long
-      int_precision( char * );          // When initialized through a char string
+      int_precision( const char * );    // When initialized through a char string
 	  int_precision( const int_precision& s) : mNumber(s.mNumber) {}  // When initialized through another int_precision
 
          
@@ -328,7 +328,7 @@ class int_precision
 ///   Always add sign if not specified 
 ///   Only use core base functions to create multi precision numbers
 //
-inline int_precision::int_precision( char *str )
+inline int_precision::int_precision( const char *str )
    {
    std::string s(str);
    
