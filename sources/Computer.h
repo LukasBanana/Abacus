@@ -37,6 +37,8 @@ class Computer : private Visitor
             
             public:
                 
+                Value(const int_precision& iprec);
+                Value(const float_precision& fprec);
                 Value(const std::string& value, bool isFloat = false);
 
                 void Add(Value& rhs);
@@ -56,6 +58,16 @@ class Computer : private Visitor
                 void Negate();
 
                 operator std::string ();
+
+                const int_precision& GetInt() const
+                {
+                    return iprec_;
+                }
+
+                const float_precision& GetFloat() const
+                {
+                    return fprec_;
+                }
 
             private:
                 

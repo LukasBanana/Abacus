@@ -15,6 +15,7 @@
 
 #include "Parser.h"
 #include "Computer.h"
+#include "../sources/precpkg/fprecision.h"
 
 
 namespace Ac
@@ -110,6 +111,16 @@ AC_EXPORT std::string Compute(const std::string& expr, Log* log)
 AC_EXPORT std::string Compute(const std::string& expr, ConstantsSet& constantsSet, Log* log)
 {
     return ComputeIntern(expr, &constantsSet, log);
+}
+
+AC_EXPORT unsigned int GetFloatPrecision()
+{
+    return float_precision_ctrl.precision();
+}
+
+AC_EXPORT void SetFloatPrecision(unsigned int digits)
+{
+    float_precision_ctrl.precision(digits);
 }
 
 
