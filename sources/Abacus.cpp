@@ -6,28 +6,41 @@
  */
 
 #include <Abacus/Abacus.h>
+#include <iostream>
+#include <sstream>
+
+#include "Parser.h"
 
 
 namespace Ac
 {
 
 
-AC_EXPORT ExprPtr ParseExpression(const std::string& expr)
+AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log)
 {
-    //todo...
-    return nullptr;
+    /* Setup input stream */
+    auto stream = std::make_shared<std::stringstream>();
+    *stream << expr;
+
+    /* Parse expression */
+    Parser parser(log);
+    return parser.Parse(std::make_shared<ExprStream>(stream));
 }
 
-AC_EXPORT std::string Compute(const std::string& expr)
+static std::string ComputeIntern(const std::string& expr, ComputeState* state, Log* log)
 {
     //todo...
     return "";
 }
 
-AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state)
+AC_EXPORT std::string Compute(const std::string& expr, Log* log)
 {
-    //todo...
-    return "";
+    return ComputeIntern(expr, nullptr, log);
+}
+
+AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state, Log* log)
+{
+    return ComputeIntern(expr, &state, log);
 }
 
 

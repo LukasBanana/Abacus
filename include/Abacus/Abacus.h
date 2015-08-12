@@ -11,6 +11,7 @@
 
 #include "Export.h"
 #include "AST.h"
+#include "Log.h"
 
 #include <string>
 #include <map>
@@ -27,10 +28,10 @@ struct ComputeState
 };
 
 
-AC_EXPORT ExprPtr ParseExpression(const std::string& expr);
+AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log = nullptr);
 
-AC_EXPORT std::string Compute(const std::string& expr);
-AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state);
+AC_EXPORT std::string Compute(const std::string& expr, Log* log = nullptr);
+AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state, Log* log = nullptr);
 
 
 } // /namespace Ac

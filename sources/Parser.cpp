@@ -18,7 +18,7 @@ Parser::Parser(Log* log) :
 {
 }
 
-std::shared_ptr<Expr> Parser::ParseSource(const std::shared_ptr<ExprStream>& stream)
+std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
 {
     if (!scanner_.Scan(stream))
         return false;
@@ -27,7 +27,7 @@ std::shared_ptr<Expr> Parser::ParseSource(const std::shared_ptr<ExprStream>& str
 
     try
     {
-        return ParseAddExpr();
+        return ParseExpr();
     }
     catch (const std::exception& err)
     {
@@ -113,6 +113,11 @@ BinaryExpr::Operators Parser::GetBinaryOperator(const std::string& spell)
     return Op::Add;
 }
 
+ExprPtr Parser::ParseExpr()
+{
+    return ParseAddExpr();
+}
+
 ExprPtr Parser::ParseAbstractBinaryExpr(
     const std::function<ExprPtr(void)>& parseFunc, const Tokens binaryOperatorToken)
 {
@@ -181,6 +186,56 @@ ExprPtr Parser::ParseValueExpr()
             return ParseUnaryExpr();
     }
     return ParseIdentExpr();
+}
+
+ExprPtr Parser::ParseIntLiteral()
+{
+    auto ast = Make<LiteralExpr>();
+
+    ast->value = Accept(Tokens::IntLiteral)->Spell();
+
+    return ast;
+}
+
+ExprPtr Parser::ParseFloatLiteral()
+{
+    auto ast = Make<LiteralExpr>();
+
+    ast->value = Accept(Tokens::FloatLiteral)->Spell();
+    ast->isFloat = true;
+
+    return ast;
+}
+
+ExprPtr Parser::ParseBracketExpr()
+{
+    Accept(Tokens::OpenBracket);
+
+    auto ast = ParseExpr();
+
+    Accept(Tokens::CloseBracket);
+
+    return ast;
+}
+
+ExprPtr Parser::ParseUnaryExpr()
+{
+    auto ast = Make<UnaryExpr>();
+
+    Accept(Tokens::SubOp);
+
+    ast->expr = ParseValueExpr();
+
+    return ast;
+}
+
+ExprPtr Parser::ParseIdentExpr()
+{
+    auto ast = Make<IdentExpr>();
+
+    ast->value = Accept(Tokens::Ident)->Spell();
+
+    return ast;
 }
 
 ExprPtr Parser::BuildBinaryExprTree(std::vector<ExprPtr>& exprs, std::vector<BinaryExpr::Operators>& ops)

@@ -100,6 +100,7 @@ struct LiteralExpr : public Expr
     __AC_AST_INTERFACE__(Literal);
 
     std::string value;
+    bool        isFloat = false;
 };
 
 struct IdentExpr : public Expr

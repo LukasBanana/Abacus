@@ -32,7 +32,7 @@ class Parser
         
         Parser(Log* log = nullptr);
 
-        std::shared_ptr<Expr> ParseSource(const std::shared_ptr<ExprStream>& stream);
+        std::shared_ptr<Expr> Parse(const std::shared_ptr<ExprStream>& stream);
 
     private:
         
@@ -86,6 +86,8 @@ class Parser
         /* === Parse functions === */
 
         BinaryExpr::Operators GetBinaryOperator(const std::string& spell);
+
+        ExprPtr ParseExpr();
 
         ExprPtr ParseAbstractBinaryExpr(
             const std::function<ExprPtr(void)>& parseFunc,
