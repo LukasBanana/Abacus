@@ -12,7 +12,7 @@ namespace Ac
 {
 
 
-AC_EXPORT std::shared_ptr<Expr> ParseExpression(const std::string& expr)
+AC_EXPORT ExprPtr ParseExpression(const std::string& expr)
 {
     //todo...
     return nullptr;

@@ -59,6 +59,8 @@ struct Expr
     StreamPosition pos;
 };
 
+using ExprPtr = std::shared_ptr<Expr>;
+
 struct UnaryExpr : public Expr
 {
     __AC_AST_INTERFACE__(Unary);
@@ -83,9 +85,9 @@ struct BinaryExpr : public Expr
         Mul,
         Div,
         Mod,
+        Pow,
         LShift,
         RShift,
-        Pow,
     };
 
     std::shared_ptr<Expr>   exprL;

@@ -27,7 +27,7 @@ struct ComputeState
 };
 
 
-AC_EXPORT std::shared_ptr<Expr> ParseExpression(const std::string& expr);
+AC_EXPORT ExprPtr ParseExpression(const std::string& expr);
 
 AC_EXPORT std::string Compute(const std::string& expr);
 AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state);
