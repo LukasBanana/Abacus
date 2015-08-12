@@ -22,16 +22,22 @@ namespace Ac
 {
 
 
-struct ComputeState
+struct ConstantsSet
 {
-    std::map<std::string, std::string> vars;
+    ConstantsSet()
+    {
+        constants["pi"] = "3.1415926535897932384626433832795";
+        constants["e"]  = "2.7182818284590452353602874713526";
+    }
+
+    std::map<std::string, std::string> constants;
 };
 
 
 AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log = nullptr);
 
 AC_EXPORT std::string Compute(const std::string& expr, Log* log = nullptr);
-AC_EXPORT std::string Compute(const std::string& expr, ComputeState& state, Log* log = nullptr);
+AC_EXPORT std::string Compute(const std::string& expr, ConstantsSet& constantsSet, Log* log = nullptr);
 
 
 } // /namespace Ac
