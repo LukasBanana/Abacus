@@ -10,6 +10,7 @@
 
 
 #include "Visitor.h"
+#include "StreamPosition.h"
 
 #include <string>
 #include <memory>
@@ -20,6 +21,10 @@ namespace Ac
 
 
 #define __AC_AST_INTERFACE__(name)                              \
+    name##Expr(const StreamPosition& pos) :                     \
+        Expr( pos )                                             \
+    {                                                           \
+    }                                                           \
     Types Type() const override                                 \
     {                                                           \
         return Types::name;                                     \
@@ -39,12 +44,19 @@ struct Expr
         Ident,
     };
 
+    Expr(const StreamPosition& pos) :
+        pos( pos )
+    {
+    }
+
     virtual ~Expr()
     {
     }
 
     virtual Types Type() const = 0;
     virtual void Visit(Visitor* visitor, void* args = nullptr) = 0;
+
+    StreamPosition pos;
 };
 
 struct UnaryExpr : public Expr
