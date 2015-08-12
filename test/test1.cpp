@@ -84,6 +84,8 @@ int main()
     LogOutput log;
 
     // parsing test
+    std::cout << "parsing:" << std::endl << "--------" << std::endl;
+
     auto ast = ParseExpression(
         //"3 + 2 ^ -1 mod 7.2 - 4 + 1"
         //"sin(x) * cos(2 mod e^log(2, 10))"
@@ -98,15 +100,24 @@ int main()
     }
 
     // constants test
+    std::cout << std::endl << "constants:" << std::endl << "----------" << std::endl;
+
     ConstantsSet constants;
     
     Compute("x = y = sin(pi/2)", constants, &log);
     Compute("z = 0.5", constants, &log);
 
-    std::cout << "constants:" << std::endl;
-
     for (const auto& c : constants.constants)
         std::cout << c.first << " = " << c.second << std::endl;
+
+    // compute test
+    std::cout << std::endl << "computing:" << std::endl << "----------" << std::endl;
+
+    auto expr =
+        "3"
+    ;
+
+    std::cout << expr << " = " << Compute(expr, constants, &log) << std::endl;
 
     #ifdef _WIN32
     system("pause");

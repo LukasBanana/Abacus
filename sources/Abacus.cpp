@@ -14,8 +14,7 @@
 #include <functional>
 
 #include "Parser.h"
-#include "precpkg/iprecision.h"
-#include "precpkg/fprecision.h"
+#include "Computer.h"
 
 
 namespace Ac
@@ -98,9 +97,9 @@ static std::string ComputeIntern(const std::string& expr, ConstantsSet* constant
         return rhsExprResult;
     }
 
-    //...
-
-    return expr;
+    /* Compute expression */
+    Computer comp;
+    return comp.ComputeExpr(expr, constantsSet, log);
 }
 
 AC_EXPORT std::string Compute(const std::string& expr, Log* log)
