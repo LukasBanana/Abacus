@@ -110,6 +110,7 @@ class Parser
         ExprPtr ParseBracketExpr();
         ExprPtr ParseUnaryExpr();
         ExprPtr ParseIdentExpr();
+        ExprPtr ParseNormExpr();
 
         ExprPtr ParseFuncExpr(std::string&& name);
 

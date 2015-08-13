@@ -22,6 +22,8 @@ AC_EXPORT UnaryExpr::Operators UnaryExpr::GetOperator(const std::string& spell)
         return UnaryOp::Negate;
     if (spell == "!")
         return UnaryOp::Factorial;
+    if (spell == "|")
+        return UnaryOp::Norm;
     return UnaryOp::__Unknown__;
 }
 
@@ -33,6 +35,8 @@ AC_EXPORT std::string UnaryExpr::GetOperatorSpell(const Operators op)
             return "-";
         case UnaryOp::Factorial:
             return "!";
+        case UnaryOp::Norm:
+            return "|";
     }
     return "";
 }

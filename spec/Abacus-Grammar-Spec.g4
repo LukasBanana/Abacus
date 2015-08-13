@@ -23,8 +23,10 @@ value_expr			: literal_expr
 					| bracket_expr
 					| unary_expr
 					| func_expr
-					| fact_expr;
+					| fact_expr
+					| norm_expr;
 
+norm_expr:			'|' expr '|';
 ident_expr:			IDENT;
 literal_expr:		INT_LITERAL | FLOAT_LITERAL;
 bracket_expr:		'(' expr ')';

@@ -173,6 +173,8 @@ ExprPtr Parser::ParseValueExpr()
             return ParseBracketExpr();
         case Tokens::SubOp:
             return ParseUnaryExpr();
+        case Tokens::NormOp:
+            return ParseNormExpr();
     }
     return ParseIdentExpr();
 }
@@ -254,6 +256,22 @@ ExprPtr Parser::ParseIdentExpr()
 
     /* Create function expression */
     return ParseFuncExpr(std::move(value));
+}
+
+// norm_expr: '|' expr '|';
+ExprPtr Parser::ParseNormExpr()
+{
+    auto ast = Make<UnaryExpr>();
+
+    ast->op = UnaryExpr::Operators::Norm;
+
+    Accept(Tokens::NormOp);
+
+    ast->expr = ParseExpr();
+
+    Accept(Tokens::NormOp);
+
+    return ast;
 }
 
 ExprPtr Parser::ParseFuncExpr(std::string&& name)

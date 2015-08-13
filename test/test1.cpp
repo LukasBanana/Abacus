@@ -92,7 +92,8 @@ int main()
         //"x*2 + y*0.1"
         //"-5*(sin(pi/3) + e^2)"
         //"---3!!!"
-        "5^-10"
+        //"5^-10"
+        "|-5|"
         //"1/3"
         //"-3 mod 5"
         //"9876123^34"
@@ -124,6 +125,15 @@ int main()
     std::cout << std::endl << "computing:" << std::endl << "----------" << std::endl;
 
     std::cout << expr << " = " << Compute(expr, constants, &log) << std::endl;
+
+    // variable test
+    std::cout << std::endl << "variables:" << std::endl << "----------" << std::endl;
+
+    for (int i = 0; i < 10; ++i)
+    {
+        Compute("x = x+1", constants, &log);
+        std::cout << "x = " << Compute("x", constants, &log) << std::endl;
+    }
 
     #ifdef _WIN32
     system("pause");

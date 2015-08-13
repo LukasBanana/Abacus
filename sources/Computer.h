@@ -11,6 +11,7 @@
 
 #include "precpkg/iprecision.h"
 #include "precpkg/fprecision.h"
+#include "Variable.h"
 
 #include <Abacus/Abacus.h>
 #include <stack>
@@ -32,52 +33,6 @@ class Computer : private Visitor
 
     private:
         
-        class Value
-        {
-            
-            public:
-                
-                Value(const int_precision& iprec);
-                Value(const float_precision& fprec);
-                Value(const std::string& value, bool isFloat = false);
-
-                void Add(Value& rhs);
-                void Sub(Value& rhs);
-                void Mul(Value& rhs);
-                void Div(Value& rhs);
-                void Mod(Value& rhs);
-                void Pow(Value& rhs);
-                void LShift(Value& rhs);
-                void RShift(Value& rhs);
-
-                void ToFloat();
-                void ToInt();
-
-                void Unify(Value& rhs);
-
-                void Negate();
-                void Factorial();
-
-                operator std::string ();
-
-                const int_precision& GetInt() const
-                {
-                    return iprec_;
-                }
-
-                const float_precision& GetFloat() const
-                {
-                    return fprec_;
-                }
-
-            private:
-                
-                int_precision   iprec_;
-                float_precision fprec_;
-                bool            isFloat_ = false;
-
-        };
-
         void Error(const std::string& msg);
 
         void VisitUnaryExpr     ( UnaryExpr*    ast, void* args ) override;
@@ -86,11 +41,11 @@ class Computer : private Visitor
         void VisitIdentExpr     ( IdentExpr*    ast, void* args ) override;
         void VisitFuncExpr      ( FuncExpr*     ast, void* args ) override;
 
-        void Push(const Value& value);
-        Value Pop();
+        void Push(const Variable& value);
+        Variable Pop();
 
-        std::stack<Value>   values_;
-        ConstantsSet*       constantsSet_;
+        std::stack<Variable>    values_;
+        ConstantsSet*           constantsSet_;
 
 };
 

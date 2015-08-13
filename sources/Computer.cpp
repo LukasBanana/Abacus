@@ -79,11 +79,6 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constan
  * ======= Private: =======
  */
 
-static bool IsFloat(const std::string& s)
-{
-    return s.find('.') != std::string::npos;
-}
-
 void Computer::Error(const std::string& msg)
 {
     throw std::runtime_error("math error: " + msg);
@@ -105,6 +100,9 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
             break;
         case Op::Factorial:
             value.Factorial();
+            break;
+        case Op::Norm:
+            value.Normalize();
             break;
     }
 
@@ -159,7 +157,7 @@ void Computer::VisitBinaryExpr(BinaryExpr* ast, void* args)
 void Computer::VisitLiteralExpr(LiteralExpr* ast, void* args)
 {
     /* Push literal value onto stack */
-    Push(Value(ast->value, IsFloat(ast->value)));
+    Push(Variable(ast->value));
 }
 
 void Computer::VisitIdentExpr(IdentExpr* ast, void* args)
@@ -171,10 +169,10 @@ void Computer::VisitIdentExpr(IdentExpr* ast, void* args)
         if (it != constantsSet_->constants.end())
         {
             /* Push value onto stack */
-            Push(Value(it->second, true));
+            Push(Variable(it->second));
         }
         else
-            Error("undefined constant 'x" + ast->value + "'");
+            Error("undefined constant '" + ast->value + "'");
     }
     else
         Error("no constants defined");
@@ -247,191 +245,18 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         Error("unknown function '" + f + "'");
 }
 
-void Computer::Push(const Value& value)
+void Computer::Push(const Variable& value)
 {
     values_.push(value);
 }
 
-Computer::Value Computer::Pop()
+Variable Computer::Pop()
 {
     if (values_.empty())
         Error("stack underflow");
     auto val = values_.top();
     values_.pop();
     return val;
-}
-
-
-/*
- * Value class
- */
-
-Computer::Value::Value(const int_precision& iprec) :
-    iprec_  ( iprec ),
-    isFloat_( false )
-{
-}
-
-Computer::Value::Value(const float_precision& fprec) :
-    fprec_  ( fprec ),
-    isFloat_( true  )
-{
-}
-
-Computer::Value::Value(const std::string& value, bool isFloat) :
-    isFloat_( isFloat )
-{
-    if (isFloat_)
-        fprec_ = float_precision(value.c_str());
-    else
-        iprec_ = int_precision(value.c_str());
-}
-
-void Computer::Value::Add(Value& rhs)
-{
-    Unify(rhs);
-    if (isFloat_)
-        fprec_ += rhs.fprec_;
-    else
-        iprec_ += rhs.iprec_;
-}
-
-void Computer::Value::Sub(Value& rhs)
-{
-    Unify(rhs);
-    if (isFloat_)
-        fprec_ -= rhs.fprec_;
-    else
-        iprec_ -= rhs.iprec_;
-}
-
-void Computer::Value::Mul(Value& rhs)
-{
-    Unify(rhs);
-    if (isFloat_)
-        fprec_ *= rhs.fprec_;
-    else
-        iprec_ *= rhs.iprec_;
-}
-
-void Computer::Value::Div(Value& rhs)
-{
-    ToFloat();
-    rhs.ToFloat();
-    fprec_ /= rhs.fprec_;
-}
-
-void Computer::Value::Mod(Value& rhs)
-{
-    ToInt();
-    rhs.ToInt();
-
-    iprec_ %= rhs.iprec_;
-
-    if (iprec_ < "0")
-        iprec_ += rhs.iprec_;
-}
-
-void Computer::Value::Pow(Value& rhs)
-{
-    Unify(rhs);
-    if (isFloat_)
-        fprec_ = pow(fprec_, rhs.fprec_);
-    else
-    {
-        if (rhs.iprec_ < 0)
-        {
-            ToFloat();
-            Pow(rhs);
-        }
-        else
-            iprec_ = ipow(iprec_, rhs.iprec_);
-    }
-}
-
-void Computer::Value::LShift(Value& rhs)
-{
-    ToInt();
-    rhs.ToInt();
-    iprec_ <<= rhs.iprec_;
-}
-
-void Computer::Value::RShift(Value& rhs)
-{
-    ToInt();
-    rhs.ToInt();
-    iprec_ >>= rhs.iprec_;
-}
-
-void Computer::Value::ToFloat()
-{
-    if (!isFloat_)
-    {
-        auto ival = iprec_.toString();
-        fprec_ = float_precision(ival.c_str());
-        isFloat_ = true;
-    }
-}
-
-void Computer::Value::ToInt()
-{
-    if (isFloat_)
-    {
-        iprec_ = fprec_.to_int_precision();
-        isFloat_ = false;
-    }
-}
-
-void Computer::Value::Unify(Value& rhs)
-{
-    if (isFloat_ && !rhs.isFloat_)
-        rhs.ToFloat();
-    else if (!isFloat_ && rhs.isFloat_)
-        ToFloat();
-}
-
-void Computer::Value::Negate()
-{
-    if (isFloat_)
-        fprec_ = -fprec_;
-    else
-        iprec_ = -iprec_;
-}
-
-static void IntPrecFactorial(int_precision& n)
-{
-    if (n == 0)
-        n = 1;
-    else
-    {
-        bool isNeg = false;
-        if (n < 0)
-        {
-            isNeg = true;
-            n = -n;
-        }
-
-        auto m = n;
-        while (m > 1)
-        {
-            --m;
-            n *= m;
-        }
-
-        if (isNeg)
-            n = -n;
-    }
-}
-
-void Computer::Value::Factorial()
-{
-    ToInt();
-    IntPrecFactorial(iprec_);
-}
-
-Computer::Value::operator std::string ()
-{
-    return isFloat_ ? fprec_.toString() : iprec_.toString();
 }
 
 
