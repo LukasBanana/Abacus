@@ -13,6 +13,7 @@
 #include <locale>
 #include <functional>
 
+#include "Beautifier.h"
 #include "Parser.h"
 #include "Computer.h"
 #include "../sources/precpkg/fprecision.h"
@@ -100,7 +101,12 @@ static std::string ComputeIntern(const std::string& expr, ConstantsSet* constant
 
     /* Compute expression */
     Computer comp;
-    return comp.ComputeExpr(expr, constantsSet, log);
+    auto result = comp.ComputeExpr(expr, constantsSet, log);
+
+    /* Beautify result literal string */
+    BeautifyLiteral(result);
+
+    return result;
 }
 
 AC_EXPORT std::string Compute(const std::string& expr, Log* log)

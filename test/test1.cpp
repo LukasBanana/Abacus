@@ -115,8 +115,8 @@ int main()
     SetFloatPrecision(50);
     
     Compute("x = 2", constants, &log);
-    Compute("y = 5", constants, &log);
-    Compute("z = 0.5", constants, &log);
+    Compute("y = -123.456", constants, &log);
+    Compute("z = 5.1", constants, &log);
 
     for (const auto& c : constants.constants)
         std::cout << c.first << " = " << c.second << std::endl;
