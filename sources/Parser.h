@@ -102,6 +102,7 @@ class Parser
         ExprPtr ParsePowExpr();
         ExprPtr ParseShiftExpr();
 
+        ExprPtr ParseFactExpr();
         ExprPtr ParseValueExpr();
 
         ExprPtr ParseIntLiteral();

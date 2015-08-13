@@ -103,6 +103,9 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
         case Op::Negate:
             value.Negate();
             break;
+        case Op::Factorial:
+            value.Factorial();
+            break;
     }
 
     /* Push result onto stack */
@@ -335,7 +338,15 @@ void Computer::Value::Pow(Value& rhs)
     if (isFloat_)
         fprec_ = pow(fprec_, rhs.fprec_);
     else
-        iprec_ = ipow(iprec_, rhs.iprec_);
+    {
+        if (rhs.iprec_ < 0)
+        {
+            ToFloat();
+            Pow(rhs);
+        }
+        else
+            iprec_ = ipow(iprec_, rhs.iprec_);
+    }
 }
 
 void Computer::Value::LShift(Value& rhs)
@@ -385,6 +396,37 @@ void Computer::Value::Negate()
         fprec_ = -fprec_;
     else
         iprec_ = -iprec_;
+}
+
+static void IntPrecFactorial(int_precision& n)
+{
+    if (n == 0)
+        n = 1;
+    else
+    {
+        bool isNeg = false;
+        if (n < 0)
+        {
+            isNeg = true;
+            n = -n;
+        }
+
+        auto m = n;
+        while (m > 1)
+        {
+            --m;
+            n *= m;
+        }
+
+        if (isNeg)
+            n = -n;
+    }
+}
+
+void Computer::Value::Factorial()
+{
+    ToInt();
+    IntPrecFactorial(iprec_);
 }
 
 Computer::Value::operator std::string ()

@@ -20,6 +20,8 @@ AC_EXPORT UnaryExpr::Operators UnaryExpr::GetOperator(const std::string& spell)
 {
     if (spell == "-")
         return UnaryOp::Negate;
+    if (spell == "!")
+        return UnaryOp::Factorial;
     return UnaryOp::__Unknown__;
 }
 
@@ -29,6 +31,8 @@ AC_EXPORT std::string UnaryExpr::GetOperatorSpell(const Operators op)
     {
         case UnaryOp::Negate:
             return "-";
+        case UnaryOp::Factorial:
+            return "!";
     }
     return "";
 }

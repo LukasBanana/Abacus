@@ -56,6 +56,7 @@ class Computer : private Visitor
                 void Unify(Value& rhs);
 
                 void Negate();
+                void Factorial();
 
                 operator std::string ();
 

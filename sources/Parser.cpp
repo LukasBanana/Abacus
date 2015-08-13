@@ -157,9 +157,10 @@ ExprPtr Parser::ParsePowExpr()
 
 ExprPtr Parser::ParseShiftExpr()
 {
-    return ParseAbstractBinaryExpr(std::bind(&Parser::ParseValueExpr, this), Tokens::ShiftOp);
+    return ParseAbstractBinaryExpr(std::bind(&Parser::ParseFactExpr, this), Tokens::ShiftOp);
 }
 
+// value_expr: literal_expr | ident_expr | bracket_expr | unary_expr | func_expr | fact_expr;
 ExprPtr Parser::ParseValueExpr()
 {
     switch (Type())
@@ -174,6 +175,26 @@ ExprPtr Parser::ParseValueExpr()
             return ParseUnaryExpr();
     }
     return ParseIdentExpr();
+}
+
+// fact_expr: value_expr | fact_expr '!';
+ExprPtr Parser::ParseFactExpr()
+{
+    auto ast = ParseValueExpr();
+
+    while (Is(Tokens::FactOp))
+    {
+        AcceptIt();
+        
+        auto factExpr = Make<UnaryExpr>();
+
+        factExpr->expr = ast;
+        factExpr->op = UnaryExpr::Operators::Factorial;
+
+        ast = factExpr;
+    }
+
+    return ast;
 }
 
 ExprPtr Parser::ParseIntLiteral()

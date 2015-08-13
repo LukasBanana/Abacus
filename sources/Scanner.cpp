@@ -160,15 +160,23 @@ TokenPtr Scanner::ScanToken()
     if (std::isdigit(UChr()))
         return ScanNumber();
 
-    /* Scan operators */
+    /* Scan operators, punctuation, special characters and brackets */
     switch (chr_)
     {
-        case '+': return Make(Token::Types::AddOp, true);
-        case '-': return Make(Token::Types::SubOp, true);
-        case '*': return Make(Token::Types::MulOp, true);
-        case '/': return Make(Token::Types::DivOp, true);
-        case '^': return Make(Token::Types::PowOp, true);
-        case ',': return Make(Token::Types::Comma, true);
+        case '+': return Make( Token::Types::AddOp,         true );
+        case '-': return Make( Token::Types::SubOp,         true );
+        case '*': return Make( Token::Types::MulOp,         true );
+        case '/': return Make( Token::Types::DivOp,         true );
+        case '^': return Make( Token::Types::PowOp,         true );
+        case ',': return Make( Token::Types::Comma,         true );
+        case '!': return Make( Token::Types::FactOp,        true );
+        case '|': return Make( Token::Types::NormOp,        true );
+        case '(': return Make( Token::Types::OpenBracket,   true );
+        case ')': return Make( Token::Types::CloseBracket,  true );
+        case '[': return Make( Token::Types::OpenParen,     true );
+        case ']': return Make( Token::Types::CloseParen,    true );
+        case '{': return Make( Token::Types::OpenCurly,     true );
+        case '}': return Make( Token::Types::CloseCurly,    true );
     }
 
     if (Is('<') || Is('>'))

@@ -39,11 +39,17 @@ class Token
             DivOp,          //!< /, mod
             PowOp,          //!< ^
             ShiftOp,        //!< <<, >>
+            FactOp,         //!< !
+            NormOp,         //!< |
 
             Comma,          //!< ,
             
             OpenBracket,    //!< (
             CloseBracket,   //!< )
+            OpenParen,      //!< [
+            CloseParen,     //!< ]
+            OpenCurly,      //!< {
+            CloseCurly,     //!< }
 
             EndOfStream,
         };

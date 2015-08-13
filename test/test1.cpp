@@ -86,12 +86,19 @@ int main()
     // parsing test
     std::cout << "parsing:" << std::endl << "--------" << std::endl;
 
-    auto ast = ParseExpression(
-        //"3 + 2 ^ -1 mod 7.2 - 4 + 1"
-        //"sin(x) * cos(2 mod e^log(2, 10))"
-        "3 mod 5"
-        ,&log
-    );
+    std::string expr =
+        //"34834^32"
+        //"1.3^1234.0"
+        //"x*2 + y*0.1"
+        //"-5*(sin(pi/3) + e^2)"
+        //"---3!!!"
+        "5^-10"
+        //"1/3"
+        //"-3 mod 5"
+        //"9876123^34"
+    ;
+
+    auto ast = ParseExpression(expr, &log);
 
     if (ast)
     {
@@ -106,7 +113,8 @@ int main()
 
     SetFloatPrecision(50);
     
-    Compute("x = y = sin(pi/3)", constants, &log);
+    Compute("x = 2", constants, &log);
+    Compute("y = 5", constants, &log);
     Compute("z = 0.5", constants, &log);
 
     for (const auto& c : constants.constants)
@@ -114,15 +122,6 @@ int main()
 
     // compute test
     std::cout << std::endl << "computing:" << std::endl << "----------" << std::endl;
-
-    auto expr =
-        //"34834^32"
-        //"1.3^1234.0"
-        //"x*2 + y*0.1"
-        "-5*(sin(pi/3) + e^2)"
-        //"1/3"
-        //"9876123^34"
-    ;
 
     std::cout << expr << " = " << Compute(expr, constants, &log) << std::endl;
 

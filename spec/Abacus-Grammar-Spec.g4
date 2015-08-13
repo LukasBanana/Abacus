@@ -13,13 +13,17 @@ sub_expr:			mul_expr ('-' mul_expr)*;
 mul_expr:			div_expr ('*' div_expr)*;
 div_expr:			pow_expr (('/' | 'mod') pow_expr)*;
 pow_expr:			shift_expr ('^' shift_expr)*;
-shift_expr:			value_expr (('<<' | '>>') value_expr)*;
+shift_expr:			fact_expr (SHIFT_OP fact_expr)*;
+
+fact_expr			: value_expr
+					| fact_expr '!';
 
 value_expr			: literal_expr
 					| ident_expr
 					| bracket_expr
 					| unary_expr
-					| func_expr;
+					| func_expr
+					| fact_expr;
 
 ident_expr:			IDENT;
 literal_expr:		INT_LITERAL | FLOAT_LITERAL;
@@ -27,6 +31,12 @@ bracket_expr:		'(' expr ')';
 unary_expr:			'-' value_expr;
 func_expr:			IDENT '(' expr_list? ')';
 expr_list:			expr (',' expr)*;
+
+SHIFT_OP	: LSHIFT_OP
+			| RSHIFT_OP;
+
+LSHIFT_OP:	'<<';
+RSHIFT_OP:	'<<';
 
 BIN_DIGIT:	[01];
 OCT_DIGIT:	[0-7];

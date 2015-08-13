@@ -72,6 +72,7 @@ struct UnaryExpr : public Expr
     {
         __Unknown__,
         Negate,
+        Factorial,
     };
 
     static AC_EXPORT Operators GetOperator(const std::string& spell);
