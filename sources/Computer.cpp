@@ -233,8 +233,6 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         Push(log(Param(0)));
     else if (f == "log10")
         Push(log10(Param(0)));
-    else if (f == "ln")
-        Push(log(Param(0))/log(float_precision(expConst)));
     else if (f == "abs")
         Push(abs(Param(0)));
     else if (f == "ceil")
