@@ -26,6 +26,11 @@ struct ConstantsSet
 {
     ConstantsSet()
     {
+        ResetStd();
+    }
+
+    void ResetStd()
+    {
         constants["pi"] = "3.1415926535897932384626433832795";
         constants["e"]  = "2.7182818284590452353602874713526";
     }

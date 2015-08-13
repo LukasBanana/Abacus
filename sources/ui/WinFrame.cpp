@@ -20,6 +20,8 @@ WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     SetIcon(wxICON(app_icon));
     #endif
 
+    Ac::SetFloatPrecision(50);
+
     /* Create window layout */
     CreateStatBar();
     CreateFont();
@@ -35,8 +37,11 @@ using ComputeCallback = std::function<void(const std::string&)>;
 
 void WinFrame::ComputeThreadProc(const std::string& expr)
 {
+    constantsSet_.ResetStd();
+
     auto result = Ac::Compute(expr, constantsSet_);
     ShowOutput(result, true);
+
     computing_ = false;
 }
 
