@@ -31,7 +31,9 @@ ident_expr:			IDENT;
 literal_expr:		INT_LITERAL | FLOAT_LITERAL;
 bracket_expr:		'(' expr ')';
 unary_expr:			'-' value_expr;
-func_expr:			IDENT '(' expr_list? ')';
+func_expr:			IDENT (argument_list | mul_expr);
+
+argument_list:		'(' expr_list? ')';
 expr_list:			expr (',' expr)*;
 
 SHIFT_OP	: LSHIFT_OP

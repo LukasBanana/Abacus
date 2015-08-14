@@ -101,6 +101,7 @@ BinaryExpr::Operators Parser::GetBinaryOperator(const std::string& spell)
     return op;
 }
 
+// expr: add_expr;
 ExprPtr Parser::ParseExpr()
 {
     return ParseAddExpr();
@@ -130,31 +131,37 @@ ExprPtr Parser::ParseAbstractBinaryExpr(
     return BuildBinaryExprTree(exprs, ops);
 }
 
+// add_expr: sub_expr ('+' sub_expr)*;
 ExprPtr Parser::ParseAddExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseSubExpr, this), Tokens::AddOp);
 }
 
+// sub_expr: mul_expr ('-' mul_expr)*;
 ExprPtr Parser::ParseSubExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseMulExpr, this), Tokens::SubOp);
 }
 
+// mul_expr: div_expr ('*' div_expr)*;
 ExprPtr Parser::ParseMulExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseDivExpr, this), Tokens::MulOp);
 }
 
+// div_expr: pow_expr (('/' | 'mod') pow_expr)*;
 ExprPtr Parser::ParseDivExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParsePowExpr, this), Tokens::DivOp);
 }
 
+// pow_expr: shift_expr ('^' shift_expr)*;
 ExprPtr Parser::ParsePowExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseShiftExpr, this), Tokens::PowOp);
 }
 
+// shift_expr: fact_expr (SHIFT_OP fact_expr)*;
 ExprPtr Parser::ParseShiftExpr()
 {
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseFactExpr, this), Tokens::ShiftOp);
@@ -199,6 +206,7 @@ ExprPtr Parser::ParseFactExpr()
     return ast;
 }
 
+// INT_LITERAL: BIN_LITERAL | OCT_LITERAL | DEC_LITERAL | HEX_LITERAL;
 ExprPtr Parser::ParseIntLiteral()
 {
     auto ast = Make<LiteralExpr>();
@@ -208,6 +216,7 @@ ExprPtr Parser::ParseIntLiteral()
     return ast;
 }
 
+// FLOAT_LITERAL: DEC_LITERAL '.' DEC_LITERAL;
 ExprPtr Parser::ParseFloatLiteral()
 {
     auto ast = Make<LiteralExpr>();
@@ -218,6 +227,7 @@ ExprPtr Parser::ParseFloatLiteral()
     return ast;
 }
 
+// bracket_expr: '(' expr ')';
 ExprPtr Parser::ParseBracketExpr()
 {
     Accept(Tokens::OpenBracket);
@@ -229,6 +239,7 @@ ExprPtr Parser::ParseBracketExpr()
     return ast;
 }
 
+// unary_expr: '-' value_expr;
 ExprPtr Parser::ParseUnaryExpr()
 {
     auto ast = Make<UnaryExpr>();
@@ -240,18 +251,27 @@ ExprPtr Parser::ParseUnaryExpr()
     return ast;
 }
 
+// ident_expr: IDENT;
 ExprPtr Parser::ParseIdentExpr()
 {
     auto value = Accept(Tokens::Ident)->Spell();
 
     if (!Is(Tokens::OpenBracket))
     {
-        /* Create identifier expression */
-        auto ast = Make<IdentExpr>();
+        if (Is(Tokens::Ident) || Is(Tokens::FloatLiteral) || Is(Tokens::IntLiteral))
+        {
+            /* Create function expression */
+            return ParseFuncExpr(std::move(value), true);
+        }
+        else
+        {
+            /* Create identifier expression */
+            auto ast = Make<IdentExpr>();
 
-        ast->value = value;
+            ast->value = value;
 
-        return ast;
+            return ast;
+        }
     }
 
     /* Create function expression */
@@ -274,15 +294,21 @@ ExprPtr Parser::ParseNormExpr()
     return ast;
 }
 
-ExprPtr Parser::ParseFuncExpr(std::string&& name)
+// func_expr: IDENT (argument_list | value_expr);
+ExprPtr Parser::ParseFuncExpr(std::string&& name, bool singleParam)
 {
     auto ast = Make<FuncExpr>();
 
     ast->name = name;
 
-    Accept(Tokens::OpenBracket);
-    ast->args = ParseExprList();
-    Accept(Tokens::CloseBracket);
+    if (!singleParam)
+    {
+        Accept(Tokens::OpenBracket);
+        ast->args = ParseExprList();
+        Accept(Tokens::CloseBracket);
+    }
+    else
+        ast->args.push_back(ParseMulExpr());
 
     return ast;
 }
@@ -315,6 +341,7 @@ ExprPtr Parser::BuildBinaryExprTree(std::vector<ExprPtr>& exprs, std::vector<Bin
     return exprs.front();
 }
 
+// expr_list: expr (',' expr)*;
 std::vector<ExprPtr> Parser::ParseExprList()
 {
     std::vector<ExprPtr> exprList;
