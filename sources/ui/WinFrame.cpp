@@ -35,12 +35,50 @@ WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
 using ComputeCallback = std::function<void(const std::string&)>;
 
+class ErrorCollector : public Ac::Log
+{
+    
+    public:
+        
+        void Error(const std::string& msg) override
+        {
+            errors_.push_back(msg);
+        }
+
+        const std::vector<std::string>& GetErrors() const
+        {
+            return errors_;
+        }
+
+        bool HasErrors() const
+        {
+            return !errors_.empty();
+        }
+
+    private:
+        
+        std::vector<std::string> errors_;
+
+};
+
 void WinFrame::ComputeThreadProc(const std::string& expr)
 {
     constantsSet_.ResetStd();
 
-    auto result = Ac::Compute(expr, constantsSet_);
-    ShowOutput(result, true);
+    /* Compute math expression */
+    ErrorCollector errHandler;
+    auto result = Ac::Compute(expr, constantsSet_, &errHandler);
+
+    /* Output result */
+    if (errHandler.HasErrors())
+    {
+        wxArrayString s;
+        for (const auto& e : errHandler.GetErrors())
+            s.Add(e);
+        ShowOutput(s, true);
+    }
+    else
+        ShowOutput(result, true);
 
     computing_ = false;
 }
@@ -90,7 +128,7 @@ void WinFrame::CreateFont()
         false,
         "courier new"
     );
-
+    
     /* Create error font */
     smallFont_ = new wxFont(
         textFieldSize/3,

@@ -12,16 +12,16 @@ namespace Ac
 {
 
 
-Parser::Parser(Log* log) :
-    scanner_( log ),
-    log_    ( log )
+Parser::Parser(Log* errHandler) :
+    ExprProcessor   ( errHandler ),
+    scanner_        ( errHandler )
 {
 }
 
 std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
 {
     if (!scanner_.Scan(stream))
-        return false;
+        return nullptr;
 
     AcceptIt();
 
@@ -32,12 +32,14 @@ std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
         if (!scanner_.HasSucceeded())
             return nullptr;
 
+        if (!Is(Tokens::EndOfStream))
+            Error("invalid continuation with token '" + tkn_->Spell() + "'");
+
         return ast;
     }
     catch (const std::exception& err)
     {
-        if (log_)
-            log_->Error(err.what());
+        SendError(err.what());
     }
 
     return nullptr;
@@ -48,24 +50,17 @@ std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
  * ======= Private: =======
  */
 
-void Parser::Error(const std::string& msg)
+std::string Parser::GetContextInfo() const
 {
-    throw std::runtime_error("syntax error (" + scanner_.Pos().ToString() + ") : " + msg);
+    return "syntax";
 }
 
 void Parser::ErrorUnexpected()
 {
-    Error("unexpected token '" + tkn_->Spell() + "'");
-}
-
-void Parser::ErrorUnexpected(const std::string& hint)
-{
-    Error("unexpected token '" + tkn_->Spell() + "' (" + hint + ")");
-}
-
-void Parser::ErrorInternal(const std::string& msg)
-{
-    throw std::runtime_error("internal error (" + scanner_.Pos().ToString() + ") : " + msg);
+    if (Is(Tokens::EndOfStream))
+        ErrorEOF();
+    else
+        Error("invalid token '" + tkn_->Spell() + "'");
 }
 
 TokenPtr Parser::Accept(const Tokens type)

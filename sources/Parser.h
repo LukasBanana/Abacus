@@ -9,6 +9,7 @@
 #define __AC_PARSER_H__
 
 
+#include "ExprProcessor.h"
 #include "Scanner.h"
 #include "Token.h"
 
@@ -25,12 +26,12 @@ namespace Ac
 
 
 //! Syntax parser class.
-class Parser
+class Parser : public ExprProcessor
 {
     
     public:
         
-        Parser(Log* log = nullptr);
+        Parser(Log* errHandler = nullptr);
 
         std::shared_ptr<Expr> Parse(const std::shared_ptr<ExprStream>& stream);
 
@@ -49,10 +50,9 @@ class Parser
 
         /* === Functions === */
 
-        void Error(const std::string& msg);
+        std::string GetContextInfo() const override;
+
         void ErrorUnexpected();
-        void ErrorUnexpected(const std::string& hint);
-        void ErrorInternal(const std::string& msg);
 
         TokenPtr Accept(const Tokens type);
         TokenPtr Accept(const Tokens type, const std::string& spell);
@@ -119,8 +119,6 @@ class Parser
         std::vector<ExprPtr> ParseExprList();
 
         /* === Members === */
-
-        Log*        log_ = nullptr;
 
         Scanner     scanner_;
         TokenPtr    tkn_;

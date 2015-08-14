@@ -27,8 +27,11 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constan
     try
     {
         auto ast = ParseExpression(expr, log);
-        Visit(ast);
-        return Pop();
+        if (ast)
+        {
+            Visit(ast);
+            return Pop();
+        }
     }
     catch (const std::exception& err)
     {
@@ -71,7 +74,7 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constan
         LogError(log, "base error (float)");
     }
 
-    return "ERR";
+    return "";
 }
 
 

@@ -28,7 +28,6 @@ class AbacusApp : public wxApp
 
 };
 
-
 IMPLEMENT_APP(AbacusApp)
 
 

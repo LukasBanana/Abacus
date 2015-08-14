@@ -9,6 +9,7 @@
 #define __AC_SCANNER_H__
 
 
+#include "ExprProcessor.h"
 #include "ExprStream.h"
 #include "Token.h"
 
@@ -23,12 +24,12 @@ namespace Ac
 
 
 //! This class stores the position in a source code file.
-class Scanner
+class Scanner : public ExprProcessor
 {
     
     public:
         
-        Scanner(Log* log = nullptr);
+        Scanner(Log* errHandler = nullptr);
 
         bool Scan(const std::shared_ptr<ExprStream>& stream);
 
@@ -52,12 +53,11 @@ class Scanner
 
     private:
         
-        /* === Functions === */
+        std::string GetContextInfo() const override;
 
         char Take(char chr);
         char TakeIt();
 
-        void Error(const std::string& msg);
         void ErrorUnexpected();
         void ErrorUnexpected(char expectedChar);
         void ErrorEOF();
@@ -90,14 +90,9 @@ class Scanner
             return static_cast<unsigned char>(chr_);
         }
 
-        /* === Members === */
-
-        Log*                        log_ = nullptr;
-
         std::shared_ptr<ExprStream> stream_;
-        char                        chr_ = 0;
-
-        bool                        succeeded_ = false;
+        char                        chr_        = 0;
+        bool                        succeeded_  = false;
 
 };
 

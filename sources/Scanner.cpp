@@ -14,8 +14,8 @@ namespace Ac
 {
 
 
-Scanner::Scanner(Log* log) :
-    log_( log )
+Scanner::Scanner(Log* errHandler) :
+    ExprProcessor( errHandler )
 {
 }
 
@@ -46,8 +46,7 @@ TokenPtr Scanner::Next()
         catch (const std::exception& err)
         {
             /* Add to error and scan next token */
-            if (log_)
-                log_->Error(err.what());
+            SendError(err.what());
             succeeded_ = false;
         }
     }
@@ -65,6 +64,11 @@ StreamPosition Scanner::Pos() const
  * ======= Private: =======
  */
 
+std::string Scanner::GetContextInfo() const
+{
+    return "lexical";
+}
+
 char Scanner::Take(char chr)
 {
     if (chr_ != chr)
@@ -80,26 +84,16 @@ char Scanner::TakeIt()
     return prevChr;
 }
 
-void Scanner::Error(const std::string& msg)
-{
-    throw std::runtime_error("lexical error (" + Pos().ToString() + ") : " + msg);
-}
-
 void Scanner::ErrorUnexpected()
 {
     auto chr = TakeIt();
-    Error("unexpected character '" + std::string(1, chr) + "'");
+    Error("invalid character '" + std::string(1, chr) + "'");
 }
 
 void Scanner::ErrorUnexpected(char expectedChar)
 {
     auto chr = TakeIt();
-    Error("unexpected character '" + std::string(1, chr) + "' (expected '" + std::string(1, expectedChar) + "')");
-}
-
-void Scanner::ErrorEOF()
-{
-    Error("unexpected end-of-file");
+    Error("invalid character '" + std::string(1, chr) + "' (expected '" + std::string(1, expectedChar) + "')");
 }
 
 void Scanner::ErrorLetterInNumber()
