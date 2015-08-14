@@ -276,7 +276,7 @@ class float_precision {
       unsigned precision( unsigned int p )         { int sign; std::string m;
                                                    sign = CHAR_SIGN( mNumber[0] );
                                                    mPrec = p > 0 ? p : float_precision_ctrl.precision();
-                                                   m = mNumber.substr(1); // Bypass sign
+                                                   m = (!mNumber.empty() ? mNumber.substr(1) : ""); // Bypass sign
                                                    mExpo += _float_precision_rounding( &m, sign, mPrec, mRmode );
                                                    mNumber = SIGN_STRING( sign ) + m;
                                                    return mPrec;

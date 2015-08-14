@@ -10,33 +10,9 @@
 #include <wx/utils.h>
 #include <wx/msgdlg.h>
 #include <wx/valtext.h>
+#include <string>
+#include <vector>
 
-
-WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
-    wxFrame( nullptr, wxID_ANY, title, pos, size, GetStyle() )
-{
-    #ifdef AC_MULTI_THREADED
-    computing_ = false;
-    #endif
-
-    #ifdef _WINDOWS
-    SetIcon(wxICON(app_icon));
-    #endif
-
-    Ac::SetFloatPrecision(50);
-
-    /* Create window layout */
-    CreateStatBar();
-    CreateFont();
-    CreateInputCtrl();
-    CreateOutputCtrl();
-
-    Centre();
-
-    ShowInfo();
-}
-
-using ComputeCallback = std::function<void(const std::string&)>;
 
 class ErrorCollector : public Ac::Log
 {
@@ -63,6 +39,30 @@ class ErrorCollector : public Ac::Log
         std::vector<std::string> errors_;
 
 };
+
+WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
+    wxFrame( nullptr, wxID_ANY, title, pos, size, GetStyle() )
+{
+    #ifdef AC_MULTI_THREADED
+    computing_ = false;
+    #endif
+
+    #ifdef _WINDOWS
+    SetIcon(wxICON(app_icon));
+    #endif
+
+    Ac::SetFloatPrecision(50);
+
+    /* Create window layout */
+    CreateStatBar();
+    CreateFont();
+    CreateInputCtrl();
+    CreateOutputCtrl();
+
+    Centre();
+
+    ShowInfo();
+}
 
 void WinFrame::ComputeThreadProc(const std::string& expr)
 {
