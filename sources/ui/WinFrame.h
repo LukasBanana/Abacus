@@ -20,6 +20,9 @@
 #include <atomic>
 
 
+// enable multi-threaded computation (to avoid deadlocks in UI)
+#define AC_MULTI_THREADED
+
 class WinFrame : public wxFrame
 {
 
@@ -52,7 +55,9 @@ class WinFrame : public wxFrame
 
         void ComputeThreadProc(const std::string& expr);
 
+        #ifdef AC_MULTI_THREADED
         void JoinThread();
+        #endif
 
         wxFont*                         stdFont_    = nullptr;
         wxFont*                         smallFont_  = nullptr;
@@ -64,8 +69,10 @@ class WinFrame : public wxFrame
 
         Ac::ConstantsSet                constantsSet_;
 
+        #ifdef AC_MULTI_THREADED
         std::unique_ptr<std::thread>    thread_;
         std::atomic_bool                computing_;
+        #endif
 
 };
 

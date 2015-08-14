@@ -15,7 +15,9 @@
 WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
     wxFrame( nullptr, wxID_ANY, title, pos, size, GetStyle() )
 {
+    #ifdef AC_MULTI_THREADED
     computing_ = false;
+    #endif
 
     #ifdef _WINDOWS
     SetIcon(wxICON(app_icon));
@@ -81,7 +83,9 @@ void WinFrame::ComputeThreadProc(const std::string& expr)
     else
         SetOutput(result);
 
+    #ifdef AC_MULTI_THREADED
     computing_ = false;
+    #endif
 }
 
 bool WinFrame::ExecExpr(const wxString& expr)
@@ -96,16 +100,26 @@ bool WinFrame::ExecExpr(const wxString& expr)
     /* Show status message */
     SetOutput("computing ...");
 
+    #ifdef AC_MULTI_THREADED
+    
+    /* Wait until previous thread has successfully terminated */
     if (computing_)
         return false;
-
-    /* Wait until previous thread has successfully terminated */
     JoinThread();
+    
+    #endif
 
     /* Compute expression */
-    computing_ = true;
+    #ifdef AC_MULTI_THREADED
 
+    computing_ = true;
     thread_ = std::unique_ptr<std::thread>(new std::thread(&WinFrame::ComputeThreadProc, this, expr.ToStdString()));
+    
+    #else
+    
+    ComputeThreadProc(expr.ToStdString());
+    
+    #endif
 
     return true;
 }
@@ -313,6 +327,8 @@ void WinFrame::OnTextEnter(wxCommandEvent& Event)
 
 void WinFrame::OnClose(wxCloseEvent& event)
 {
+    #ifdef AC_MULTI_THREADED
+
     if (thread_)
     {
         if (computing_)
@@ -335,9 +351,13 @@ void WinFrame::OnClose(wxCloseEvent& event)
             JoinThread();
     }
 
+    #endif
+
     /* Close frame */
     wxFrame::OnCloseWindow(event);
 }
+
+#ifdef AC_MULTI_THREADED
 
 void WinFrame::JoinThread()
 {
@@ -347,6 +367,8 @@ void WinFrame::JoinThread()
         thread_ = nullptr;
     }
 }
+
+#endif
 
 
 
