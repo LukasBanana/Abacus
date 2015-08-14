@@ -17,6 +17,10 @@ ExprProcessor::ExprProcessor(Log* errHandler) :
 {
 }
 
+ExprProcessor::~ExprProcessor()
+{
+}
+
 void ExprProcessor::Error(const std::string& msg)
 {
     throw std::runtime_error(GetContextInfo() + " error: " + msg);

@@ -25,6 +25,8 @@ class ExprProcessor
         
         ExprProcessor(Log* errHandler = nullptr);
 
+        virtual ~ExprProcessor();
+
     protected:
         
         //! Returns which kind of expression processor this is (e.g. "syntax", or "lexical").
