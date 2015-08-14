@@ -60,7 +60,6 @@ class Scanner : public ExprProcessor
 
         void ErrorUnexpected();
         void ErrorUnexpected(char expectedChar);
-        void ErrorEOF();
         void ErrorLetterInNumber();
 
         //! Ignores all characters which comply the specified predicate.

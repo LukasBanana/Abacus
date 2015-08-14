@@ -9,6 +9,7 @@
 
 #include <wx/utils.h>
 #include <wx/msgdlg.h>
+#include <wx/valtext.h>
 
 
 WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
@@ -144,11 +145,15 @@ void WinFrame::CreateInputCtrl()
 {
     auto clientSize = GetClientSize();
 
+    wxTextValidator validator(wxFILTER_EMPTY | wxFILTER_EXCLUDE_LIST);
+    validator.SetCharExcludes("~φόδ\"§$%&{}[]°#\'\\΄`");
+
     inCtrl_ = new wxTextCtrl(
         this, wxID_ANY, "",
         wxPoint(border, border),
         wxSize(clientSize.GetWidth() - border*2, textFieldSize),
-        wxTE_PROCESS_ENTER
+        wxTE_PROCESS_ENTER,
+        validator
     );
 
     inCtrl_->SetFont(*stdFont_);
@@ -209,52 +214,65 @@ void WinFrame::ShowInfo()
     /* Startup text */
     wxArrayString Info;
     {
-        Info.Add("Welcome to the Abacus Calculator");
+        Info.Add("Abacus Calculator");
         Info.Add("");
         Info.Add("Copyright (C) 2015  Lukas Hermanns");
         Info.Add("Licensed under the terms of the 3-Clause BSD License");
         Info.Add("");
         Info.Add("Enter arithmetic expressions in the above text field");
         Info.Add("");
-        Info.Add("Supported operators:");
-        Info.Add("  A + B       A plus B");
-        Info.Add("  A - B       A minus B");
-        Info.Add("  A * B       A multiplied by B");
-        Info.Add("  A / B       A divided by B");
-        Info.Add("  A ^ B       A power of B");
-        Info.Add("  A mod B     A modulo B");
-        Info.Add("  X << S      X left-shifted by S");
-        Info.Add("  X >> S      X right-shifted by S");
-        Info.Add("  X!          Factorial of X");
-        Info.Add("  | X |       Norm of X");
+        Info.Add("Supported Operators:");
+        Info.Add("  A + B           A plus B");
+        Info.Add("  A - B           A minus B");
+        Info.Add("  A * B           A multiplied by B");
+        Info.Add("  A / B           A divided by B");
+        Info.Add("  A ^ B           A power of B");
+        Info.Add("  A mod B         A modulo B");
+        Info.Add("  X << S          X left-shifted by S");
+        Info.Add("  X >> S          X right-shifted by S");
+        Info.Add("  X!              Factorial of X");
+        Info.Add("  | X |           Norm of X");
         Info.Add("");
-        Info.Add("Standard constants:");
-        Info.Add("  pi          Number pi ~ 3.14...");
-        Info.Add("  e           Euler's number e ~ 2.71...");
+        Info.Add("Standard Constants:");
+        Info.Add("  pi              Number pi ~ 3.14...");
+        Info.Add("  e               Euler's number e ~ 2.71...");
         Info.Add("");
-        Info.Add("Supported functions:");
-        Info.Add("  sin(X)      Sine of X");
-        Info.Add("  cos(X)      Cosine of X");
-        Info.Add("  tan(X)      Tangent of X");
-        Info.Add("  asin(X)     Arc sine of X");
-        Info.Add("  acos(X)     Arc cosine of X");
-        Info.Add("  atan(X)     Arc tangent of X");
-        Info.Add("  sinh(X)     Hyperbolic sine of X");
-        Info.Add("  cosh(X)     Hyperbolic cosine of X");
-        Info.Add("  tanh(X)     Hyperbolic tangent of X");
-        Info.Add("  pow(B, E)   B power of E");
-        Info.Add("  exp(X)      Exponetial function of X (e^X)");
-        Info.Add("  sqrt(X)     Square root of X");
-        Info.Add("  log(X)      Logarithm of X to base e");
-        Info.Add("  log10(X)    Logarithm of X to base 10");
-        Info.Add("  abs(X)      Absolute value of X");
+        Info.Add("Supported Functions:");
+        Info.Add("  sin(X)          Sine of X");
+        Info.Add("  cos(X)          Cosine of X");
+        Info.Add("  tan(X)          Tangent of X");
+        Info.Add("  asin(X)         Arc sine of X");
+        Info.Add("  acos(X)         Arc cosine of X");
+        Info.Add("  atan(X)         Arc tangent of X");
+        Info.Add("  atan2(X, Y)     Arc tangent of Y/X");
+        Info.Add("  sinh(X)         Hyperbolic sine of X");
+        Info.Add("  cosh(X)         Hyperbolic cosine of X");
+        Info.Add("  tanh(X)         Hyperbolic tangent of X");
+        Info.Add("  asinh(X)        Hyperbolic arc sine of X");
+        Info.Add("  acosh(X)        Hyperbolic arc cosine of X");
+        Info.Add("  atanh(X)        Hyperbolic arc tangent of X");
+        Info.Add("  pow(B, E)       B power of E");
+        Info.Add("  exp(X)          Exponetial function of X (e^X)");
+        Info.Add("  sqrt(X)         Square root of X");
+        Info.Add("  log(X)          Logarithm of X to base e");
+        Info.Add("  log10(X)        Logarithm of X to base 10");
+        Info.Add("  abs(X)          Absolute value of X");
+        Info.Add("");
+        Info.Add("Special Input:");
+        Info.Add("  exit            quit application");
+        Info.Add("  demo            shows the next expresion for demonstration");
     }
     ShowOutput(Info, true);
 }
 
 void WinFrame::OnTextEnter(wxCommandEvent& Event)
 {
-    ExecExpr(Event.GetString());
+    auto s = Event.GetString();
+
+    if (s == "exit")
+        Close();
+    else
+        ExecExpr(s);
 }
 
 void WinFrame::OnClose(wxCloseEvent& event)

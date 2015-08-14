@@ -43,6 +43,7 @@ class WinFrame : public wxFrame
         void ShowInfo();
 
         void OnTextEnter(wxCommandEvent& event);
+        void OnTextChange(wxCommandEvent& event);
         void OnClose(wxCloseEvent& event);
 
         void ComputeThreadProc(const std::string& expr);

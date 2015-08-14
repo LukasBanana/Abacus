@@ -83,6 +83,8 @@ TokenPtr Parser::AcceptIt()
 {
     auto prevTkn = tkn_;
     tkn_ = scanner_.Next();
+    if (!tkn_)
+        ErrorEOF();
     return prevTkn;
 }
 

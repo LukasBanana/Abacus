@@ -35,7 +35,7 @@ bool Scanner::Scan(const std::shared_ptr<ExprStream>& stream)
 
 TokenPtr Scanner::Next()
 {
-    while (true)
+    while (!Is(0))
     {
         try
         {
@@ -87,13 +87,19 @@ char Scanner::TakeIt()
 void Scanner::ErrorUnexpected()
 {
     auto chr = TakeIt();
-    Error("invalid character '" + std::string(1, chr) + "'");
+    if (chr != 0 && chr != '\n')
+        Error("invalid character '" + std::string(1, chr) + "'");
+    else
+        ErrorEOF();
 }
 
 void Scanner::ErrorUnexpected(char expectedChar)
 {
     auto chr = TakeIt();
-    Error("invalid character '" + std::string(1, chr) + "' (expected '" + std::string(1, expectedChar) + "')");
+    if (chr != 0 && chr != '\n')
+        Error("invalid character '" + std::string(1, chr) + "' (expected '" + std::string(1, expectedChar) + "')");
+    else
+        ErrorEOF();
 }
 
 void Scanner::ErrorLetterInNumber()
