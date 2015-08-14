@@ -22,6 +22,10 @@ namespace Ac
 {
 
 
+#define __AC_MAJOR_VERSION__ 1
+#define __AC_MINOR_VERSION__ 0
+#define __AC_VERSION_STR__ "1.00 Alpha"
+
 struct ConstantsSet
 {
     ConstantsSet()

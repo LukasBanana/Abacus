@@ -76,10 +76,10 @@ void WinFrame::ComputeThreadProc(const std::string& expr)
         wxArrayString s;
         for (const auto& e : errHandler.GetErrors())
             s.Add(e);
-        ShowOutput(s, true);
+        SetOutput(s);
     }
     else
-        ShowOutput(result, true);
+        SetOutput(result);
 
     computing_ = false;
 }
@@ -94,7 +94,7 @@ bool WinFrame::ExecExpr(const wxString& expr)
     }
 
     /* Show status message */
-    ShowOutput("computing ...", true);
+    SetOutput("computing ...");
 
     if (computing_)
         return false;
@@ -146,7 +146,7 @@ void WinFrame::CreateInputCtrl()
     auto clientSize = GetClientSize();
 
     wxTextValidator validator(wxFILTER_EMPTY | wxFILTER_EXCLUDE_LIST);
-    validator.SetCharExcludes("~φόδ\"§$%&{}[]°#\'\\΄`");
+    validator.SetCharExcludes("µ@€:;~φόδ\"§$%&{}[]°#\'\\΄`");
 
     inCtrl_ = new wxTextCtrl(
         this, wxID_ANY, "",
@@ -183,7 +183,7 @@ void WinFrame::CreateOutputCtrl()
 void WinFrame::CreateStatBar()
 {
     statusBar_ = CreateStatusBar();
-    statusBar_->PushStatusText("Version 1.00 Alpha", 0);
+    statusBar_->PushStatusText("Version " __AC_VERSION_STR__, 0);
 }
 
 long WinFrame::GetStyle() const
@@ -191,14 +191,14 @@ long WinFrame::GetStyle() const
     return wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxMINIMIZE_BOX | wxCLOSE_BOX;
 }
 
-void WinFrame::ShowOutput(const wxString& out, bool smallView)
+void WinFrame::SetOutput(const wxString& out, bool largeView)
 {
     wxArrayString s;
     s.Add(out);
-    ShowOutput(s, smallView);
+    SetOutput(s, largeView);
 }
 
-void WinFrame::ShowOutput(const wxArrayString& out, bool smallView)
+void WinFrame::SetOutput(const wxArrayString& out, bool largeView)
 {
     wxString str;
 
@@ -206,7 +206,12 @@ void WinFrame::ShowOutput(const wxArrayString& out, bool smallView)
         str += out[i] + "\n";
 
     outCtrl_->SetValue(str);
-    outCtrl_->SetFont(smallView ? *smallFont_ : *stdFont_);
+    outCtrl_->SetFont(largeView ? *stdFont_ : *smallFont_);
+}
+
+void WinFrame::SetInput(const wxString& in)
+{
+    inCtrl_->SetValue(in);
 }
 
 void WinFrame::ShowInfo()
@@ -262,7 +267,36 @@ void WinFrame::ShowInfo()
         Info.Add("  exit            quit application");
         Info.Add("  demo            shows the next expresion for demonstration");
     }
-    ShowOutput(Info, true);
+    SetOutput(Info);
+}
+
+void WinFrame::ShowDemo()
+{
+    static int n;
+
+    static const char* demos[] =
+    {
+        "5 + (6! - 8^3)*2.5",
+        "x = 6",
+        "y = z = x*2",
+        "x+y+z",
+        "log 10 + 26",
+        "100!",
+        "10^10^10",
+        "3---8",
+        "|3---8|",
+        "sin pi/2 + sqrt(1 + (2^-12)*2)",
+        nullptr
+    };
+
+    /* Set next demo */
+    if (!demos[n])
+        n = 0;
+
+    SetInput(demos[n]);
+    ExecExpr(demos[n]);
+
+    ++n;
 }
 
 void WinFrame::OnTextEnter(wxCommandEvent& Event)
@@ -271,6 +305,8 @@ void WinFrame::OnTextEnter(wxCommandEvent& Event)
 
     if (s == "exit")
         Close();
+    else if (s == "demo")
+        ShowDemo();
     else
         ExecExpr(s);
 }

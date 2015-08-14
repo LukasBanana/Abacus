@@ -38,9 +38,13 @@ class WinFrame : public wxFrame
 
         long GetStyle() const;
 
-        void ShowOutput(const wxString& out, bool smallView = false);
-        void ShowOutput(const wxArrayString& out, bool smallView = false);
+        void SetOutput(const wxString& out, bool largeView = false);
+        void SetOutput(const wxArrayString& out, bool largeView = false);
+
+        void SetInput(const wxString& in);
+
         void ShowInfo();
+        void ShowDemo();
 
         void OnTextEnter(wxCommandEvent& event);
         void OnTextChange(wxCommandEvent& event);
