@@ -9,10 +9,37 @@
 
 #include <wx/utils.h>
 #include <wx/valtext.h>
+#include <wx/clipbrd.h>
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
+
+static const char charMul = char(215);
+static const char charDiv = char(247);
+
+static void AdjustExprOut(std::string& s)
+{
+    for (auto& c : s)
+    {
+        if (c == charMul)
+            c = '*';
+        else if (c == charDiv)
+            c = '/';
+    }
+}
+
+static void AdjustExprIn(std::string& s)
+{
+    for (auto& c : s)
+    {
+        if (c == '*')
+            c = charMul;
+        else if (c == '/')
+            c = charDiv;
+    }
+}
 
 Input::Input(wxWindow* parent, const wxPoint& pos, const wxSize& size, const wxFont& font, const Callback& callback) :
     wxTextCtrl  ( parent, wxID_ANY, "", pos, size, wxTE_PROCESS_ENTER ),
@@ -20,6 +47,26 @@ Input::Input(wxWindow* parent, const wxPoint& pos, const wxSize& size, const wxF
 {
     SetFont(font);
     Bind(wxEVT_CHAR, &Input::OnChar, this);
+}
+
+void Input::Replace(std::string s)
+{
+    /* Get previous insertion position */
+    auto pos = GetInsertionPoint();
+    
+    /* Set new text input */
+    AdjustExprIn(s);
+    SetValue(s);
+
+    /* Reset insertion position */
+    SetInsertionPoint(ClampPos(pos));
+}
+
+std::string Input::Get() const
+{
+    auto s = GetValue().ToStdString();
+    AdjustExprOut(s);
+    return s;
 }
 
 
@@ -122,42 +169,13 @@ void Input::Erase(long dir)
     }
 }
 
-void Input::Replace(const std::string& s)
-{
-    /* Get previous insertion position */
-    auto pos = GetInsertionPoint();
-    
-    /* Set new text input */
-    SetValue(s);
-
-    /* Reset insertion position */
-    SetInsertionPoint(ClampPos(pos));
-}
-
-static const char charMul = char(215);
-static const char charDiv = char(247);
-
-static void AdjustExpr(std::string& s)
-{
-    for (auto& c : s)
-    {
-        if (c == charMul)
-            c = '*';
-        else if (c == charDiv)
-            c = '/';
-    }
-}
-
 void Input::Enter()
 {
-    auto s = GetValue().ToStdString();
+    auto s = Get();
 
     /* Commit callback */
     if (callback_)
-    {
-        AdjustExpr(s);
         callback_(s);
-    }
 
     #if 0//todo -> make this optional for the user!!!
     /* Select all to make removal for user easier */
@@ -191,7 +209,7 @@ void Input::HistoryNext()
 
 void Input::StoreTemp()
 {
-    tempInput_ = GetValue().ToStdString();
+    tempInput_ = Get();
 }
 
 static bool IsValidInputChar(char c)
@@ -202,7 +220,7 @@ static bool IsValidInputChar(char c)
         ( c >= 'A' && c <= 'Z' ) ||
         ( c == '(' || c == ')' ) ||
         ( c == '[' || c == ']' ) ||
-        ( c == '{' || c == '}' ) ||
+        //( c == '{' || c == '}' ) ||
         ( c == '+' || c == '-' ) ||
         ( c == '=' || c == '!' ) ||
         ( c == ',' || c == '.' ) ||
@@ -221,8 +239,26 @@ void Input::OnChar(wxKeyEvent& event)
 
     if (ctrl)
     {
-        if (key == WXK_CONTROL_A)
-            SetSelection(0, GetLastPosition());
+        switch (key)
+        {
+            case WXK_CONTROL_A:
+                SetSelection(0, GetLastPosition());
+                break;
+            case WXK_CONTROL_C:
+                wxClipboard::Get()->SetData(new wxTextDataObject(Get()));
+                break;
+            case WXK_CONTROL_X:
+                wxClipboard::Get()->SetData(new wxTextDataObject(Get()));
+                Replace("");
+                break;
+            case WXK_CONTROL_V:
+                {
+                    wxTextDataObject data;
+                    if (wxClipboard::Get()->GetData(data))
+                        Replace(data.GetText().ToStdString());
+                }
+                break;
+        }
     }
     else
     {

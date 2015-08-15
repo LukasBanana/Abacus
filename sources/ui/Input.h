@@ -30,6 +30,10 @@ class Input : public wxTextCtrl
             const wxFont& font, const Callback& callback
         );
 
+        void Replace(std::string s);
+
+        std::string Get() const;
+
         const HistoryType& GetHistory() const
         {
             return history_;
@@ -49,7 +53,6 @@ class Input : public wxTextCtrl
         
         void Insert(char chr);
         void Erase(long dir);
-        void Replace(const std::string& s);
 
         void Enter();
         void HistoryPrev();

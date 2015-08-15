@@ -202,7 +202,7 @@ void WinFrame::CreateOutputCtrl()
             clientSize.GetWidth() - border*2,
             clientSize.GetHeight() - posY - border
         ),
-        wxTE_READONLY | wxTE_MULTILINE
+        wxTE_READONLY | wxTE_MULTILINE | wxTE_CHARWRAP
     );
 
     outCtrl_->SetFont(*stdFont_);
@@ -237,9 +237,9 @@ void WinFrame::SetOutput(const wxArrayString& out, bool largeView)
     outCtrl_->SetFont(largeView ? *stdFont_ : *smallFont_);
 }
 
-void WinFrame::SetInput(const wxString& in)
+void WinFrame::SetInput(const std::string& in)
 {
-    inCtrl_->SetValue(in);
+    inCtrl_->Replace(in);
 }
 
 void WinFrame::ShowInfo()

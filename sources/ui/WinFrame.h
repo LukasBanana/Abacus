@@ -47,7 +47,7 @@ class WinFrame : public wxFrame
         void SetOutput(const wxString& out, bool largeView = false);
         void SetOutput(const wxArrayString& out, bool largeView = false);
 
-        void SetInput(const wxString& in);
+        void SetInput(const std::string& in);
 
         void ShowInfo();
         void ShowDemo();
