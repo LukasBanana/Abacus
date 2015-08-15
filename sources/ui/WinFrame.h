@@ -9,6 +9,8 @@
 #define __AC_WIN_FRAME_H__
 
 
+#include "Input.h"
+
 #include <wx/frame.h>
 #include <wx/textctrl.h>
 #include <wx/font.h>
@@ -16,6 +18,7 @@
 #include <Abacus/Abacus.h>
 #include <functional>
 #include <thread>
+#include <string>
 #include <memory>
 #include <atomic>
 
@@ -48,8 +51,10 @@ class WinFrame : public wxFrame
 
         void ShowInfo();
         void ShowDemo();
+        void ShowConstants();
 
         void OnClose(wxCloseEvent& event);
+        void OnResize(wxSizeEvent& event);
 
         void ComputeThreadProc(const std::string& expr);
 
@@ -57,10 +62,13 @@ class WinFrame : public wxFrame
         void JoinThread();
         #endif
 
+        bool SaveConfig(const std::string& filename);
+        bool LoadConfig(const std::string& filename);
+
         wxFont*                         stdFont_    = nullptr;
         wxFont*                         smallFont_  = nullptr;
 
-        wxTextCtrl*                     inCtrl_     = nullptr;
+        Input*                          inCtrl_     = nullptr;
         wxTextCtrl*                     outCtrl_    = nullptr;
 
         wxStatusBar*                    statusBar_  = nullptr;

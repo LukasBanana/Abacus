@@ -12,7 +12,7 @@
 #include <vector>
 
 
-template <typename T, std::size_t N = 100u>
+template <typename T, std::size_t N = 20u>
 class History
 {
 
@@ -62,6 +62,11 @@ class History
         bool IsEnd() const
         {
             return idx_ + 1 == values_.size();
+        }
+
+        const std::vector<T>& GetValues() const
+        {
+            return values_;
         }
 
     private:

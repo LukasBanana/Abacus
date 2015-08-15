@@ -23,11 +23,21 @@ class Input : public wxTextCtrl
     public:
         
         using Callback = std::function<void(const std::string&)>;
+        using HistoryType = History<std::string>;
 
         Input(
             wxWindow* parent, const wxPoint& pos, const wxSize& size,
             const wxFont& font, const Callback& callback
         );
+
+        const HistoryType& GetHistory() const
+        {
+            return history_;
+        }
+        HistoryType& GetHistory()
+        {
+            return history_;
+        }
 
     private:
         
@@ -49,11 +59,11 @@ class Input : public wxTextCtrl
 
         void OnChar(wxKeyEvent& event);
 
-        wxTextPos               selStart_ = 0l;
-        Callback                callback_;
+        wxTextPos   selStart_ = 0l;
+        Callback    callback_;
 
-        History<std::string>    history_;
-        std::string             tempInput_;
+        HistoryType history_;
+        std::string tempInput_;
 
 };
 

@@ -14,7 +14,11 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
+
+static const std::string configFilename = "abacus-config.ini";
 
 class ErrorCollector : public Ac::Log
 {
@@ -61,9 +65,16 @@ WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     CreateInputCtrl();
     CreateOutputCtrl();
 
+    SetMinClientSize(wxSize(300, 100));
+
+    Bind(wxEVT_CLOSE_WINDOW, &WinFrame::OnClose, this);
+    Bind(wxEVT_SIZE, &WinFrame::OnResize, this);
+
     Centre();
 
     ShowInfo();
+
+    LoadConfig(configFilename);
 }
 
 void WinFrame::ComputeThreadProc(const std::string& expr)
@@ -94,44 +105,43 @@ bool WinFrame::ExecExpr(const std::string& expr)
 {
     /* If expression is empty -> show information */
     if (expr.empty())
-    {
         ShowInfo();
-        return false;
-    }
     else if (expr == "exit")
     {
+        /* Clear input to avoid storing "exit" in the config-file */
+        SetInput("");
         Close();
-        return true;
     }
     else if (expr == "demo")
-    {
         ShowDemo();
-        return true;
+    else if (expr == "const")
+        ShowConstants();
+    else
+    {
+        /* Show status message */
+        SetOutput("computing ...");
+
+        #ifdef AC_MULTI_THREADED
+    
+        /* Wait until previous thread has successfully terminated */
+        if (computing_)
+            return false;
+        JoinThread();
+    
+        #endif
+
+        /* Compute expression */
+        #ifdef AC_MULTI_THREADED
+
+        computing_ = true;
+        thread_ = std::unique_ptr<std::thread>(new std::thread(&WinFrame::ComputeThreadProc, this, expr));
+    
+        #else
+    
+        ComputeThreadProc(expr.ToStdString());
+    
+        #endif
     }
-
-    /* Show status message */
-    SetOutput("computing ...");
-
-    #ifdef AC_MULTI_THREADED
-    
-    /* Wait until previous thread has successfully terminated */
-    if (computing_)
-        return false;
-    JoinThread();
-    
-    #endif
-
-    /* Compute expression */
-    #ifdef AC_MULTI_THREADED
-
-    computing_ = true;
-    thread_ = std::unique_ptr<std::thread>(new std::thread(&WinFrame::ComputeThreadProc, this, expr));
-    
-    #else
-    
-    ComputeThreadProc(expr.ToStdString());
-    
-    #endif
 
     return true;
 }
@@ -141,8 +151,8 @@ bool WinFrame::ExecExpr(const std::string& expr)
  * ======= Private: =======
  */
 
-static const int textFieldSize = 25;
-static const int border = 10;
+static const int textFieldSize  = 25;
+static const int border         = 10;
 
 void WinFrame::CreateFont()
 {
@@ -178,8 +188,6 @@ void WinFrame::CreateInputCtrl()
         *stdFont_,
         [&](const std::string& s){ ExecExpr(s); }
     );
-
-    Bind(wxEVT_CLOSE_WINDOW, &WinFrame::OnClose, this);
 }
 
 void WinFrame::CreateOutputCtrl()
@@ -208,7 +216,7 @@ void WinFrame::CreateStatBar()
 
 long WinFrame::GetStyle() const
 {
-    return wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxMINIMIZE_BOX | wxCLOSE_BOX;
+    return wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxRESIZE_BORDER | wxCLOSE_BOX;
 }
 
 void WinFrame::SetOutput(const wxString& out, bool largeView)
@@ -289,8 +297,9 @@ void WinFrame::ShowInfo()
         Info.Add("  max(X1, ..., Xn)    Maximum of all values");
         Info.Add("");
         Info.Add("Special Input:");
-        Info.Add("  exit                quit application");
-        Info.Add("  demo                shows the next expresion for demonstration");
+        Info.Add("  exit                Quit application");
+        Info.Add("  const               Shows all stored constants");
+        Info.Add("  demo                Shows the next expresion for demonstration");
     }
     SetOutput(Info);
 }
@@ -327,6 +336,20 @@ void WinFrame::ShowDemo()
     ++n;
 }
 
+void WinFrame::ShowConstants()
+{
+    wxArrayString s;
+
+    std::size_t maxLen = 0;
+    for (const auto& c : constantsSet_.constants)
+        maxLen = std::max(maxLen, c.first.size());
+
+    for (const auto& c : constantsSet_.constants)
+        s.Add(c.first + std::string(maxLen - c.first.size(), ' ') + " = " + c.second);
+
+    SetOutput(s);
+}
+
 void WinFrame::OnClose(wxCloseEvent& event)
 {
     #ifdef AC_MULTI_THREADED
@@ -355,8 +378,20 @@ void WinFrame::OnClose(wxCloseEvent& event)
 
     #endif
 
+    /* Save configuration */
+    SaveConfig(configFilename);
+
     /* Close frame */
     wxFrame::OnCloseWindow(event);
+}
+
+void WinFrame::OnResize(wxSizeEvent& event)
+{
+    auto clientSize = GetClientSize();
+    auto posY = border*2 + textFieldSize;
+
+    inCtrl_->SetSize(wxSize(clientSize.GetWidth() - border*2, textFieldSize));
+    outCtrl_->SetSize(wxSize(clientSize.GetWidth() - border*2, clientSize.GetHeight() - posY - border));
 }
 
 #ifdef AC_MULTI_THREADED
@@ -371,6 +406,116 @@ void WinFrame::JoinThread()
 }
 
 #endif
+
+bool WinFrame::SaveConfig(const std::string& filename)
+{
+    /* Open file for writing */
+    std::ofstream file(filename);
+    if (!file.good())
+        return false;
+
+    /* Define [W]rite function */
+    auto W = [&file](const std::string& ident, const std::string& value)
+    {
+        file << '\"' << ident << "\" = \"" << value << '\"' << std::endl;
+    };
+
+    /* Store window location */
+    W("$window_x", std::to_string(GetPosition().x));
+    W("$window_y", std::to_string(GetPosition().y));
+    W("$window_width", std::to_string(GetSize().GetWidth()));
+    W("$window_height", std::to_string(GetSize().GetHeight()));
+
+    /* Store last input */
+    W("$input", inCtrl_->GetValue().ToStdString());
+
+    /* Store history */
+    std::size_t historyIdx = 0;
+    for (const auto& v : inCtrl_->GetHistory().GetValues())
+        W("$history_" + std::to_string(historyIdx++), v);
+
+    /* Store constants */
+    for (const auto& c : constantsSet_.constants)
+        W(c.first, c.second);
+
+    return true;
+}
+
+template <typename T>
+T Num(const std::string& s)
+{
+    T val = T(0);
+    std::istringstream stream(s);
+    stream >> val;
+    return val;
+}
+
+bool WinFrame::LoadConfig(const std::string& filename)
+{
+    /* Open file for writing */
+    std::ifstream file(filename);
+    if (!file.good())
+        return false;
+
+    /* Define [R]ead function */
+    std::string line, ident, value;
+
+    auto R = [&line](std::size_t& pos) -> std::string
+    {
+        pos = line.find('\"', pos);
+        if (pos != std::string::npos)
+        {
+            auto start = ++pos;
+            pos = line.find('\"', pos);
+            if (pos != std::string::npos)
+            {
+                auto end = pos++;
+                return line.substr(start, end - start);
+            }
+        }
+        return "";
+    };
+
+    auto RInt = [&value]()
+    {
+        return Num<int>(value);
+    };
+
+    /* Read file content */
+    while (!file.eof())
+    {
+        /* Read next line from file */
+        std::getline(file, line);
+        
+        std::size_t pos = 0;
+        ident = R(pos);
+        value = R(pos);
+
+        /* Map values to configurations */
+        if (ident.empty())
+            continue;
+
+        if (ident.front() == '$')
+        {
+            if (ident == "$window_x")
+                SetPosition(wxPoint(RInt(), GetPosition().y));
+            else if (ident == "$window_y")
+                SetPosition(wxPoint(GetPosition().x, RInt()));
+            else if (ident == "$window_width")
+                SetSize(wxSize(RInt(), GetSize().GetHeight()));
+            else if (ident == "$window_height")
+                SetSize(wxSize(GetSize().GetWidth(), RInt()));
+            else if (ident == "$input")
+                SetInput(value);
+            else if (ident.size() > 9 && ident.substr(0, 9) == "$history_")
+                inCtrl_->GetHistory().Add(value);
+        }
+        else
+            constantsSet_.constants[ident] = value;
+    }
+
+    return true;
+}
 
 
 
