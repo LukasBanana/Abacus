@@ -12,6 +12,7 @@
 #include <wx/valtext.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 
 class ErrorCollector : public Ac::Log
@@ -96,6 +97,16 @@ bool WinFrame::ExecExpr(const wxString& expr)
         ShowInfo();
         return false;
     }
+    else if (expr == "exit")
+    {
+        Close();
+        return true;
+    }
+    else if (expr == "demo")
+    {
+        ShowDemo();
+        return true;
+    }
 
     /* Show status message */
     SetOutput("computing ...");
@@ -173,6 +184,8 @@ void WinFrame::CreateInputCtrl()
     inCtrl_->SetFont(*stdFont_);
 
     inCtrl_->Bind(wxEVT_TEXT_ENTER, &WinFrame::OnTextEnter, this);
+    inCtrl_->Bind(wxEVT_CHAR, &WinFrame::OnChar, this);
+
     Bind(wxEVT_CLOSE_WINDOW, &WinFrame::OnClose, this);
 }
 
@@ -305,6 +318,9 @@ void WinFrame::ShowDemo()
         "3---8",
         "|3---8|",
         "sin pi/2 + sqrt(1 + (2^-12)*2)",
+        "sum[i=1, 10](i*2 - 2^i)",
+        "cross([1, 2, 3], [4, 5, 6])",
+        "| [0, -1, 2] - [4, 0.5, 3] |",
         nullptr
     };
 
@@ -318,16 +334,160 @@ void WinFrame::ShowDemo()
     ++n;
 }
 
+void WinFrame::MoveCursorLeft(bool shift)
+{
+    auto pos = std::max(inCtrl_->GetInsertionPoint() - 1l, 0l);
+    
+    /* Get previous selection */
+    long from, to;
+    inCtrl_->GetSelection(&from, &to);
+
+    /* Set new insertion position */
+    if (from == to)
+        selStart_ = to;
+    else
+        pos = from;
+
+    inCtrl_->SetInsertionPoint(pos);
+    selStart_ = pos;
+
+    /* Update selection */
+    if (shift)
+        inCtrl_->SetSelection(std::max(from - 1l, 0l), to);
+}
+
+void WinFrame::MoveCursorRight(bool shift)
+{
+    auto pos = std::min(inCtrl_->GetInsertionPoint() + 1l, inCtrl_->GetLastPosition());
+
+    /* Get previous selection */
+    long from, to;
+    inCtrl_->GetSelection(&from, &to);
+
+    /* Set new insertion position */
+    if (from == to)
+        selStart_ = from;
+    else
+        pos = to;
+
+    inCtrl_->SetInsertionPoint(pos);
+    selStart_ = pos;
+
+    /* Update selection */
+    if (shift)
+        inCtrl_->SetSelection(from, std::min(to + 1l, inCtrl_->GetLastPosition()));
+}
+
+void WinFrame::LocateCursor(long pos, bool shift)
+{
+    pos = std::max(0l, std::min(pos, inCtrl_->GetLastPosition()));
+
+    /* Get previous selection */
+    long from, to;
+    inCtrl_->GetSelection(&from, &to);
+
+    if (shift)
+    {
+        if (selStart_ < pos)
+            inCtrl_->SetSelection(selStart_, pos);
+        else
+            inCtrl_->SetSelection(pos, selStart_);
+    }
+    else
+    {
+        inCtrl_->SetInsertionPoint(pos);
+        selStart_ = pos;
+    }
+}
+
+void WinFrame::Insert(char chr)
+{
+    inCtrl_->WriteText(wxString(1, chr));
+}
+
+void WinFrame::Remove(long dir)
+{
+    auto pos = inCtrl_->GetInsertionPoint();
+
+    if (dir < 0 && pos > 0)
+        inCtrl_->Remove(std::max(0l, pos + dir), pos);
+    else if (dir > 0 && pos < inCtrl_->GetLastPosition())
+        inCtrl_->Remove(pos, std::min(pos + dir, inCtrl_->GetLastPosition()));
+}
+
 void WinFrame::OnTextEnter(wxCommandEvent& Event)
 {
-    auto s = Event.GetString();
+    ExecExpr(Event.GetString());
+}
 
-    if (s == "exit")
-        Close();
-    else if (s == "demo")
-        ShowDemo();
+static bool IsValidInputChar(char c)
+{
+    return
+        ( c >= '0' && c <= '9' ) ||
+        ( c >= 'a' && c <= 'z' ) ||
+        ( c >= 'A' && c <= 'Z' ) ||
+        ( c == '(' || c == ')' ) ||
+        ( c == '[' || c == ']' ) ||
+        ( c == '{' || c == '}' ) ||
+        ( c == '+' || c == '-' ) ||
+        ( c == '=' || c == '!' ) ||
+        ( c == ',' || c == '.' ) ||
+        ( c == '^' || c == '|' ) ||
+        ( c == ' ' || c == '_' ) ||
+        ( c == '>' || c == '<' );
+}
+
+void WinFrame::OnChar(wxKeyEvent& event)
+{
+    auto key = event.GetKeyCode();
+    auto chr = static_cast<char>(key);
+
+    bool shift = event.ShiftDown();
+    bool ctrl = event.ControlDown();
+
+    if (ctrl)
+    {
+        if (key == WXK_CONTROL_A)
+            inCtrl_->SetSelection(0, inCtrl_->GetLastPosition());
+    }
     else
-        ExecExpr(s);
+    {
+        switch (key)
+        {
+            case WXK_LEFT:
+                MoveCursorLeft(shift);
+                break;
+            case WXK_RIGHT:
+                MoveCursorRight(shift);
+                break;
+            case WXK_HOME:
+                LocateCursor(0, shift);
+                break;
+            case WXK_END:
+                LocateCursor(inCtrl_->GetLastPosition(), shift);
+                break;
+            case WXK_ESCAPE:
+                SetInput("");
+                break;
+            case WXK_BACK:
+                Remove(-1);
+                break;
+            case WXK_DELETE:
+                Remove(1);
+                break;
+            case WXK_RETURN:
+                ExecExpr(inCtrl_->GetValue());
+                break;
+            default:
+                if (IsValidInputChar(chr))
+                    Insert(chr);
+                else if (chr == '/')
+                    Insert(char(247));
+                else if (chr == '*')
+                    Insert(char(215));
+                break;
+        }
+    }
 }
 
 void WinFrame::OnClose(wxCloseEvent& event)
