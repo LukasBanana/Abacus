@@ -40,6 +40,8 @@ class Computer : private Visitor
         void VisitLiteralExpr   ( LiteralExpr*  ast, void* args ) override;
         void VisitIdentExpr     ( IdentExpr*    ast, void* args ) override;
         void VisitFuncExpr      ( FuncExpr*     ast, void* args ) override;
+        void VisitFoldExpr      ( FoldExpr*     ast, void* args ) override;
+        void VisitVectorExpr    ( VectorExpr*   ast, void* args ) override;
 
         void Push(const Variable& value);
         Variable Pop();

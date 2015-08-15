@@ -73,6 +73,24 @@ class Printer : public Visitor
                 Visit(arg);
         }
 
+        void VisitFoldExpr(FoldExpr* ast, void* args) override
+        {
+            log_.Info("Fold Expr: " + ast->func);
+            auto dummy = log_.Indent();
+            log_.Info("index: '" + ast->index + "'");
+            Visit(ast->initExpr);
+            Visit(ast->iterExpr);
+            Visit(ast->loopExpr);
+        }
+
+        void VisitVectorExpr(VectorExpr* ast, void* args) override
+        {
+            log_.Info("Vector Expr");
+            auto dummy = log_.Indent();
+            for (const auto& comp : ast->components)
+                Visit(comp);
+        }
+
     private:
         
         LogOutput& log_;

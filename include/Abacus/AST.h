@@ -45,6 +45,8 @@ struct Expr
         Literal,
         Ident,
         Func,
+        Fold,
+        Vector,
     };
 
     Expr(const StreamPosition& pos) :
@@ -129,6 +131,24 @@ struct FuncExpr : public Expr
 
     std::string             name;
     std::vector<ExprPtr>    args;
+};
+
+struct FoldExpr : public Expr
+{
+    __AC_AST_INTERFACE__(Fold);
+
+    std::string             func;       // fold function name (either "sum" or "product").
+    std::string             index;      // identifier of the index variable
+    ExprPtr                 initExpr;   // expression to initialize the index
+    ExprPtr                 iterExpr;   // expression for the index iterationp
+    ExprPtr                 loopExpr;   // expression inside the fold loop
+};
+
+struct VectorExpr : public Expr
+{
+    __AC_AST_INTERFACE__(Vector);
+
+    std::vector<ExprPtr> components; // expressions of the vector components
 };
 
 

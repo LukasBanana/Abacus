@@ -246,6 +246,16 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         Error("unknown function '" + f + "'");
 }
 
+void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
+{
+    //todo...
+}
+
+void Computer::VisitVectorExpr(VectorExpr* ast, void* args)
+{
+    //todo...
+}
+
 void Computer::Push(const Variable& value)
 {
     values_.push(value);
