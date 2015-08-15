@@ -39,39 +39,39 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constan
     }
     catch (int_precision::bad_int_syntax)
     {
-        LogError(log, "bad integer syntax (interger)");
+        LogError(log, "bad integer syntax");
     }
     catch (int_precision::out_of_range)
     {
-        LogError(log, "out of range (interger)");
+        LogError(log, "out of range");
     }
     catch (int_precision::divide_by_zero)
     {
-        LogError(log, "division by zero (interger)");
+        LogError(log, "division by zero");
     }
     catch (float_precision::bad_int_syntax)
     {
-        LogError(log, "bad integer syntax (float)");
+        LogError(log, "bad integer syntax");
     }
     catch (float_precision::bad_float_syntax)
     {
-        LogError(log, "bad float syntax (float)");
+        LogError(log, "bad float syntax");
     }
     catch (float_precision::out_of_range)
     {
-        LogError(log, "out of range (float)");
+        LogError(log, "out of range");
     }
     catch (float_precision::divide_by_zero)
     {
-        LogError(log, "division by zero (float)");
+        LogError(log, "division by zero");
     }
     catch (float_precision::domain_error)
     {
-        LogError(log, "domain error (float)");
+        LogError(log, "domain error");
     }
     catch (float_precision::base_error)
     {
-        LogError(log, "base error (float)");
+        LogError(log, "base error");
     }
 
     return "";

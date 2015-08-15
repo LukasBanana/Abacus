@@ -160,7 +160,7 @@ void WinFrame::CreateInputCtrl()
     auto clientSize = GetClientSize();
 
     wxTextValidator validator(wxFILTER_EMPTY | wxFILTER_EXCLUDE_LIST);
-    validator.SetCharExcludes("µ@€:;~φόδ\"§$%&{}[]°#\'\\΄`");
+    validator.SetCharExcludes("µ@€;~φόδί\"§$%&°#\'\\΄`");
 
     inCtrl_ = new wxTextCtrl(
         this, wxID_ANY, "",
