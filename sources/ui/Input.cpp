@@ -27,6 +27,11 @@ Input::Input(wxWindow* parent, const wxPoint& pos, const wxSize& size, const wxF
  * ======= Private: =======
  */
 
+long Input::ClampPos(long pos) const
+{
+    return std::max(0l, std::min(pos, GetLastPosition()));
+}
+
 void Input::MoveCursorLeft(bool shift)
 {
     auto pos = std::max(GetInsertionPoint() - 1l, 0l);
@@ -73,7 +78,7 @@ void Input::MoveCursorRight(bool shift)
 
 void Input::LocateCursor(long pos, bool shift)
 {
-    pos = std::max(0l, std::min(pos, GetLastPosition()));
+    pos = ClampPos(pos);
 
     /* Get previous selection */
     long from, to;
@@ -117,8 +122,77 @@ void Input::Erase(long dir)
     }
 }
 
+void Input::Replace(const std::string& s)
+{
+    /* Get previous insertion position */
+    auto pos = GetInsertionPoint();
+    
+    /* Set new text input */
+    SetValue(s);
+
+    /* Reset insertion position */
+    SetInsertionPoint(ClampPos(pos));
+}
+
 static const char charMul = char(215);
 static const char charDiv = char(247);
+
+static void AdjustExpr(std::string& s)
+{
+    for (auto& c : s)
+    {
+        if (c == charMul)
+            c = '*';
+        else if (c == charDiv)
+            c = '/';
+    }
+}
+
+void Input::Enter()
+{
+    auto s = GetValue().ToStdString();
+
+    /* Commit callback */
+    if (callback_)
+    {
+        AdjustExpr(s);
+        callback_(s);
+    }
+
+    #if 0//todo -> make this optional for the user!!!
+    /* Select all to make removal for user easier */
+    SelectAll();
+    #endif
+
+    /* Store value in history */
+    history_.Add(s);
+}
+
+void Input::HistoryPrev()
+{
+    history_.Prev();
+    std::string s;
+    if (history_.Get(s))
+        Replace(s);
+}
+
+void Input::HistoryNext()
+{
+    if (history_.IsEnd())
+        Replace(tempInput_);
+    else
+    {
+        history_.Next();
+        std::string s;
+        if (history_.Get(s))
+            Replace(s);
+    }
+}
+
+void Input::StoreTemp()
+{
+    tempInput_ = GetValue().ToStdString();
+}
 
 static bool IsValidInputChar(char c)
 {
@@ -135,17 +209,6 @@ static bool IsValidInputChar(char c)
         ( c == '^' || c == '|' ) ||
         ( c == ' ' || c == '_' ) ||
         ( c == '>' || c == '<' );
-}
-
-static void AdjustExpr(std::string& s)
-{
-    for (auto& c : s)
-    {
-        if (c == charMul)
-            c = '*';
-        else if (c == charDiv)
-            c = '/';
-    }
 }
 
 void Input::OnChar(wxKeyEvent& event)
@@ -171,6 +234,12 @@ void Input::OnChar(wxKeyEvent& event)
             case WXK_RIGHT:
                 MoveCursorRight(shift);
                 break;
+            case WXK_UP:
+                HistoryPrev();
+                break;
+            case WXK_DOWN:
+                HistoryNext();
+                break;
             case WXK_HOME:
                 LocateCursor(0, shift);
                 break;
@@ -187,12 +256,7 @@ void Input::OnChar(wxKeyEvent& event)
                 Erase(1);
                 break;
             case WXK_RETURN:
-                if (callback_)
-                {
-                    auto s = GetValue().ToStdString();
-                    AdjustExpr(s);
-                    callback_(s);
-                }
+                Enter();
                 break;
             default:
                 if (key > 0 && key < 128)

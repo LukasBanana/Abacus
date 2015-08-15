@@ -322,8 +322,6 @@ void WinFrame::ShowDemo()
         n = 0;
 
     SetInput(demos[n]);
-    inCtrl_->SelectAll();
-
     ExecExpr(demos[n]);
 
     ++n;
