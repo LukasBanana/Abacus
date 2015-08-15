@@ -30,7 +30,7 @@ class WinFrame : public wxFrame
         
         WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 
-        bool ExecExpr(const wxString& expr);
+        bool ExecExpr(const std::string& expr);
 
     private:
         
@@ -49,14 +49,6 @@ class WinFrame : public wxFrame
         void ShowInfo();
         void ShowDemo();
 
-        void MoveCursorLeft(bool shift);
-        void MoveCursorRight(bool shift);
-        void LocateCursor(long pos, bool shift);
-        void Insert(char chr);
-        void Remove(long dir);
-
-        void OnTextEnter(wxCommandEvent& event);
-        void OnChar(wxKeyEvent& event);
         void OnClose(wxCloseEvent& event);
 
         void ComputeThreadProc(const std::string& expr);
@@ -72,8 +64,6 @@ class WinFrame : public wxFrame
         wxTextCtrl*                     outCtrl_    = nullptr;
 
         wxStatusBar*                    statusBar_  = nullptr;
-
-        wxTextPos                       selStart_   = 0l;
 
         Ac::ConstantsSet                constantsSet_;
 
