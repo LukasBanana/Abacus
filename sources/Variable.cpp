@@ -24,13 +24,13 @@ Variable::Variable(const float_precision& fprec) :
 {
 }
 
-static bool IsFloat(const std::string& s)
+static bool IsStrFloat(const std::string& s)
 {
     return s.find('.') != std::string::npos || s.find('E') != std::string::npos;
 }
 
 Variable::Variable(const std::string& value) :
-    isFloat_( IsFloat(value) )
+    isFloat_( IsStrFloat(value) )
 {
     
     if (isFloat_)

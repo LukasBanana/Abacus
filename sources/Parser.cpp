@@ -164,7 +164,7 @@ ExprPtr Parser::ParseShiftExpr()
     return ParseAbstractBinaryExpr(std::bind(&Parser::ParseFactExpr, this), Tokens::ShiftOp);
 }
 
-// value_expr: literal_expr | ident_expr | bracket_expr | unary_expr | func_expr | fact_expr;
+// value_expr: literal_expr | ident_expr | bracket_expr | unary_expr | func_expr | fact_expr | norm_expr | fold_expr | vector_expr;
 ExprPtr Parser::ParseValueExpr()
 {
     switch (Type())
@@ -179,6 +179,8 @@ ExprPtr Parser::ParseValueExpr()
             return ParseUnaryExpr();
         case Tokens::NormOp:
             return ParseNormExpr();
+        case Tokens::FoldFunc:
+            return ParseFoldExpr();
     }
     return ParseIdentExpr();
 }
@@ -287,6 +289,32 @@ ExprPtr Parser::ParseNormExpr()
     ast->expr = ParseExpr();
 
     Accept(Tokens::NormOp);
+
+    return ast;
+}
+
+// fold_expr:       FOLD_IDENT fold_expr_init mul_expr;
+// fold_expr_init:  '[' IDENT '=' expr ',' expr ']';
+// FOLD_IDENT:      'sum' | 'product';
+ExprPtr Parser::ParseFoldExpr()
+{
+    auto ast = Make<FoldExpr>();
+
+    ast->func = Accept(Tokens::FoldFunc)->Spell();
+    
+    Accept(Tokens::OpenParen);
+
+    ast->index = Accept(Tokens::Ident)->Spell();
+
+    Accept(Tokens::Equal);
+    ast->initExpr = ParseExpr();
+
+    Accept(Tokens::Comma);
+    ast->iterExpr = ParseExpr();
+
+    Accept(Tokens::CloseParen);
+
+    ast->loopExpr = ParseMulExpr();
 
     return ast;
 }

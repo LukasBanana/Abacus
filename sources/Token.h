@@ -43,6 +43,7 @@ class Token
             NormOp,         //!< |
 
             Comma,          //!< ,
+            Equal,          //!< =
             
             OpenBracket,    //!< (
             CloseBracket,   //!< )
@@ -50,6 +51,8 @@ class Token
             CloseParen,     //!< ]
             OpenCurly,      //!< {
             CloseCurly,     //!< }
+
+            FoldFunc,       //!< sum, product
 
             EndOfStream,
         };

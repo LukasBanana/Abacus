@@ -169,6 +169,7 @@ TokenPtr Scanner::ScanToken()
         case '/': return Make( Token::Types::DivOp,         true );
         case '^': return Make( Token::Types::PowOp,         true );
         case ',': return Make( Token::Types::Comma,         true );
+        case '=': return Make( Token::Types::Equal,         true );
         case '!': return Make( Token::Types::FactOp,        true );
         case '|': return Make( Token::Types::NormOp,        true );
         case '(': return Make( Token::Types::OpenBracket,   true );
@@ -207,6 +208,8 @@ TokenPtr Scanner::ScanIdentifier()
     /* Scan reserved words */
     if (spell == "mod")
         return Make(Token::Types::DivOp, spell);
+    if (spell == "sum" || spell == "product")
+        return Make(Token::Types::FoldFunc, spell);
 
     /* Return as identifier */
     return Make(Token::Types::Ident, spell);

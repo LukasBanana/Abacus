@@ -24,13 +24,20 @@ static void LogError(Log* log, const std::string& msg)
 
 std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constantsSet, Log* log)
 {
+    /* Setup constant set */
+    ConstantsSet tempConstSet;
+
     constantsSet_ = constantsSet;
+    if (!constantsSet_)
+        constantsSet_ = &tempConstSet;
 
     try
     {
+        /* Parse expression stream */
         auto ast = ParseExpression(expr, log);
         if (ast)
         {
+            /* Compute AST */
             Visit(ast);
             return Pop();
         }
@@ -380,7 +387,43 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
 
 void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
 {
-    //todo...
+    /* Check if initialization and iteration expressions have integer type */
+    Visit(ast->initExpr);
+    auto initVal = Pop();
+
+    Visit(ast->iterExpr);
+    auto iterVal = Pop();
+
+    if (initVal.IsFloat() || iterVal.IsFloat())
+        Error("fold function '" + ast->func + "' can only have discrete iterations");
+
+    /* Fold loop expression */
+    auto idx = initVal.GetInt();
+    auto idxEnd = iterVal.GetInt();
+
+    bool isSum = (ast->func == "sum");
+    Variable result(std::string(isSum ? "0" : "1"));
+
+    while (idx <= idxEnd)
+    {
+        /* Setup new value for index variable */
+        constantsSet_->constants[ast->index] = idx.toString();
+
+        /* Compute current iteration */
+        Visit(ast->loopExpr);
+        auto val = Pop();
+        
+        /* Fold with result */
+        if (isSum)
+            result.Add(val);
+        else
+            result.Mul(val);
+
+        ++idx;
+    }
+
+    /* Return result */
+    Push(result);
 }
 
 void Computer::VisitVectorExpr(VectorExpr* ast, void* args)

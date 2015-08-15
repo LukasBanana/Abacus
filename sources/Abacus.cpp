@@ -72,31 +72,34 @@ static std::string ComputeIntern(const std::string& expr, ConstantsSet* constant
 {
     /* Check if a new constant should be added */
     auto pos = expr.find('=');
-
     if (pos != std::string::npos)
     {
-        /* Compute sub expression (right hand side) */
-        auto rhsExpr = expr.substr(pos + 1);
-        auto rhsExprResult = ComputeIntern(rhsExpr, constantsSet, log);
-
-        /* Set new constant value */
-        if (constantsSet)
+        auto pos2 = expr.find('[');
+        if (pos2 == std::string::npos || pos2 > pos)
         {
-            auto lhsExpr = expr.substr(0, pos);
-            Trim(lhsExpr);
+            /* Compute sub expression (right hand side) */
+            auto rhsExpr = expr.substr(pos + 1);
+            auto rhsExprResult = ComputeIntern(rhsExpr, constantsSet, log);
 
-            /* Validate constant name */
-            if (!IsIdentValid(lhsExpr))
+            /* Set new constant value */
+            if (constantsSet)
             {
-                if (log)
-                    log->Error("invalid constant name \"" + lhsExpr + "\"");
-                return "0";
+                auto lhsExpr = expr.substr(0, pos);
+                Trim(lhsExpr);
+
+                /* Validate constant name */
+                if (!IsIdentValid(lhsExpr))
+                {
+                    if (log)
+                        log->Error("invalid constant name \"" + lhsExpr + "\"");
+                    return "0";
+                }
+
+                constantsSet->constants[lhsExpr] = rhsExprResult;
             }
 
-            constantsSet->constants[lhsExpr] = rhsExprResult;
+            return rhsExprResult;
         }
-
-        return rhsExprResult;
     }
 
     /* Compute expression */

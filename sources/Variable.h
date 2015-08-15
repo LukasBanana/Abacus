@@ -60,6 +60,11 @@ class Variable
             return fprec_;
         }
 
+        bool IsFloat() const
+        {
+            return isFloat_;
+        }
+
     private:
                 
         int_precision   iprec_;

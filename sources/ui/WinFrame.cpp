@@ -254,7 +254,7 @@ void WinFrame::ShowInfo()
         Info.Add("");
         Info.Add("Enter arithmetic expressions in the above text field");
         Info.Add("");
-        Info.Add("Supported Operators:");
+        Info.Add("Operators:");
         Info.Add("  A + B               A plus B");
         Info.Add("  A - B               A minus B");
         Info.Add("  A * B               A multiplied by B");
@@ -270,7 +270,7 @@ void WinFrame::ShowInfo()
         Info.Add("  pi                  Number pi ~ 3.14...");
         Info.Add("  e                   Euler's number e ~ 2.71...");
         Info.Add("");
-        Info.Add("Supported Functions:");
+        Info.Add("Basic Functions:");
         Info.Add("  sin(X)              Sine of X");
         Info.Add("  cos(X)              Cosine of X");
         Info.Add("  tan(X)              Tangent of X");
@@ -295,6 +295,10 @@ void WinFrame::ShowInfo()
         Info.Add("  rand()              Pseudo random number in [0, 1]");
         Info.Add("  min(X1, ..., Xn)    Minimum of all values");
         Info.Add("  max(X1, ..., Xn)    Maximum of all values");
+        Info.Add("");
+        Info.Add("Fold Functions:");
+        Info.Add("  sum[X=I, N] E       Sums expression E with index variable X from I to N");
+        Info.Add("  product[X=I, N] E   Mutliplies expression E with index variable X from I to N");
         Info.Add("");
         Info.Add("Special Input:");
         Info.Add("  exit                Quit application");

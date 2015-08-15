@@ -111,6 +111,7 @@ class Parser : public ExprProcessor
         ExprPtr ParseUnaryExpr();
         ExprPtr ParseIdentExpr();
         ExprPtr ParseNormExpr();
+        ExprPtr ParseFoldExpr();
 
         ExprPtr ParseFuncExpr(std::string&& name, bool singleParam = false);
 
