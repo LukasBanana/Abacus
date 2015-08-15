@@ -1,7 +1,7 @@
 
 Special keywords:
 
-sum[i=0, 10](i^2)
+sum[i=0, 10] i^2
 -----------------
 s := 0
 i := 0

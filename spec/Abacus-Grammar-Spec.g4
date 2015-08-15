@@ -24,7 +24,9 @@ value_expr			: literal_expr
 					| unary_expr
 					| func_expr
 					| fact_expr
-					| norm_expr;
+					| norm_expr
+					| fold_expr
+					| vector_expr;
 
 norm_expr:			'|' expr '|';
 ident_expr:			IDENT;
@@ -32,6 +34,12 @@ literal_expr:		INT_LITERAL | FLOAT_LITERAL;
 bracket_expr:		'(' expr ')';
 unary_expr:			'-' value_expr;
 func_expr:			IDENT (argument_list | mul_expr);
+vector_expr:		'[' expr_list ']';
+
+fold_expr:			FOLD_IDENT fold_expr_init mul_expr;
+fold_expr_init:		'[' IDENT '=' expr ',' expr ']';
+FOLD_IDENT			: 'sum'
+					| 'product';
 
 argument_list:		'(' expr_list? ')';
 expr_list:			expr (',' expr)*;

@@ -276,6 +276,8 @@ void WinFrame::ShowInfo()
         Info.Add("  log(X)          Logarithm of X to base e");
         Info.Add("  log10(X)        Logarithm of X to base 10");
         Info.Add("  abs(X)          Absolute value of X");
+        Info.Add("  ceil(X)         Rounds X upward");
+        Info.Add("  floor(X)        Rounds X downward");
         Info.Add("");
         Info.Add("Special Input:");
         Info.Add("  exit            quit application");

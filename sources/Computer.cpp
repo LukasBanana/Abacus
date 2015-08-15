@@ -239,9 +239,9 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
     else if (f == "abs")
         Push(abs(Param(0)));
     else if (f == "ceil")
-        Push(ceil(Param(0)));
+        Push(ceil(Param(0)).to_int_precision());
     else if (f == "floor")
-        Push(floor(Param(0)));
+        Push(floor(Param(0)).to_int_precision());
     else
         Error("unknown function '" + f + "'");
 }
