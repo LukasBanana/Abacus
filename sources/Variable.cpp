@@ -115,6 +115,36 @@ void Variable::RShift(Variable& rhs)
     iprec_ >>= rhs.iprec_;
 }
 
+void Variable::Min(Variable& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+    {
+        if (fprec_ > rhs.fprec_)
+            fprec_ = rhs.fprec_;
+    }
+    else
+    {
+        if (iprec_ > rhs.iprec_)
+            iprec_ = rhs.iprec_;
+    }
+}
+
+void Variable::Max(Variable& rhs)
+{
+    Unify(rhs);
+    if (isFloat_)
+    {
+        if (fprec_ < rhs.fprec_)
+            fprec_ = rhs.fprec_;
+    }
+    else
+    {
+        if (iprec_ < rhs.iprec_)
+            iprec_ = rhs.iprec_;
+    }
+}
+
 void Variable::ToFloat()
 {
     if (!isFloat_)

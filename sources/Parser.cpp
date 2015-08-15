@@ -301,7 +301,8 @@ ExprPtr Parser::ParseFuncExpr(std::string&& name, bool singleParam)
     if (!singleParam)
     {
         Accept(Tokens::OpenBracket);
-        ast->args = ParseExprList();
+        if (!Is(Tokens::CloseBracket))
+            ast->args = ParseExprList();
         Accept(Tokens::CloseBracket);
     }
     else

@@ -36,6 +36,8 @@ class Variable
         void Pow(Variable& rhs);
         void LShift(Variable& rhs);
         void RShift(Variable& rhs);
+        void Min(Variable& rhs);
+        void Max(Variable& rhs);
 
         void ToFloat();
         void ToInt();

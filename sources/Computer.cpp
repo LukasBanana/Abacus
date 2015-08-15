@@ -7,6 +7,8 @@
 
 #include "Computer.h"
 
+#include <random>
+
 
 namespace Ac
 {
@@ -186,11 +188,31 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
     /* Find function */
     auto f = ast->name;
     
+    auto ParamCount = [&](std::size_t n)
+    {
+        auto m = ast->args.size();
+
+        if (m != n)
+        {
+            /* Setup well readable output message */
+            std::string required = (n == 1 ? "1 argument" : std::to_string(n) + " arguments");
+            std::string given = (m == 1 ? "1 is" : std::to_string(m) + " are");
+
+            Error(
+                "function '" + ast->name + "' requires exactly " +
+                required + ", but " + given + " specified"
+            );
+        }
+    };
+
+    auto ParamCountNot0 = [&]()
+    {
+        if (ast->args.empty())
+            Error("function '" + ast->name + "' requires at least 1 argument, but 0 are specified");
+    };
+
     auto Param = [&](std::size_t i) -> float_precision
     {
-        if (i >= ast->args.size())
-            Error("not enough parameters for function '" + ast->name + "'");
-
         /* Evaluate argument */
         Visit(ast->args[i]);
         auto val = Pop();
@@ -201,47 +223,157 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
     };
 
     if (f == "sin")
+    {
+        ParamCount(1);
         Push(sin(Param(0)));
+    }
     else if (f == "cos")
+    {
+        ParamCount(1);
         Push(cos(Param(0)));
+    }
     else if (f == "tan")
+    {
+        ParamCount(1);
         Push(tan(Param(0)));
+    }
     else if (f == "sinh")
+    {
+        ParamCount(1);
         Push(sinh(Param(0)));
+    }
     else if (f == "cosh")
+    {
+        ParamCount(1);
         Push(cosh(Param(0)));
+    }
     else if (f == "tanh")
+    {
+        ParamCount(1);
         Push(tanh(Param(0)));
+    }
     else if (f == "asin")
+    {
+        ParamCount(1);
         Push(asin(Param(0)));
+    }
     else if (f == "acos")
+    {
+        ParamCount(1);
         Push(acos(Param(0)));
+    }
     else if (f == "atan")
+    {
+        ParamCount(1);
         Push(atan(Param(0)));
+    }
     else if (f == "atan2")
+    {
+        ParamCount(2);
         Push(atan2(Param(0), Param(1)));
+    }
     else if (f == "asinh")
+    {
+        ParamCount(1);
         Push(asinh(Param(0)));
+    }
     else if (f == "acosh")
+    {
+        ParamCount(1);
         Push(acosh(Param(0)));
+    }
     else if (f == "atanh")
+    {
+        ParamCount(1);
         Push(atanh(Param(0)));
+    }
     else if (f == "pow")
+    {
+        ParamCount(2);
         Push(pow(Param(0), Param(1)));
+    }
     else if (f == "sqrt")
+    {
+        ParamCount(1);
         Push(sqrt(Param(0)));
+    }
     else if (f == "exp")
+    {
+        ParamCount(1);
         Push(exp(Param(0)));
+    }
     else if (f == "log")
+    {
+        ParamCount(1);
         Push(log(Param(0)));
+    }
     else if (f == "log10")
+    {
+        ParamCount(1);
         Push(log10(Param(0)));
+    }
     else if (f == "abs")
+    {
+        ParamCount(1);
         Push(abs(Param(0)));
+    }
     else if (f == "ceil")
+    {
+        ParamCount(1);
         Push(ceil(Param(0)).to_int_precision());
+    }
     else if (f == "floor")
+    {
+        ParamCount(1);
         Push(floor(Param(0)).to_int_precision());
+    }
+    else if (f == "rand")
+    {
+        ParamCount(0);
+        
+        /* Generate random number in the range [0, 1] */
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
+        std::uniform_real_distribution<> dist(0, 1);
+
+        Push(float_precision(dist(gen)));
+    }
+    else if (f == "min")
+    {
+        ParamCountNot0();
+
+        /* Get first value */
+        auto it = ast->args.begin();
+        Visit(*it);
+        auto result = Pop();
+
+        /* Apply minification with all other arguments */
+        for (++it; it != ast->args.end(); ++it)
+        {
+            Visit(*it);
+            result.Min(Pop());
+        }
+
+        Push(result);
+    }
+    else if (f == "max")
+    {
+        ParamCountNot0();
+
+        /* Get first value */
+        auto it = ast->args.begin();
+        Visit(*it);
+        auto result = Pop();
+
+        /* Apply minification with all other arguments */
+        for (++it; it != ast->args.end(); ++it)
+        {
+            Visit(*it);
+            result.Max(Pop());
+        }
+
+        Push(result);
+    }
     else
         Error("unknown function '" + f + "'");
 }
