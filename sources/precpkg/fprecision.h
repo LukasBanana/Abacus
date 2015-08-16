@@ -935,7 +935,7 @@ inline float_precision& float_precision::operator=( const float_precision& a )
 
    mExpo = a.mExpo;   
    sign = a.sign();
-   mNumber = a.mNumber.substr(1);
+   mNumber = (!a.mNumber.empty() ? a.mNumber.substr(1) : "");
    if( _float_precision_rounding( &mNumber, sign, mPrec, mRmode ) != 0 )  // Round back to left hand side precision
       mExpo++;
 
