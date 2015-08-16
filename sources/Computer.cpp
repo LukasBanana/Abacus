@@ -236,7 +236,7 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
             Error("function '" + ast->name + "' requires at least 1 argument, but 0 are specified");
     };
 
-    auto Param = [&](std::size_t i) -> const float_precision&
+    auto Param = [&](std::size_t i) -> float_precision
     {
         /* Evaluate argument */
         Visit(ast->args[i]);
