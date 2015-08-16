@@ -36,7 +36,12 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constan
         {
             /* Compute AST */
             Visit(ast);
-            return Pop();
+
+            /* Return (beautified) result */
+            std::string result = Pop();
+            BeautifyLiteral(result);
+
+            return result;
         }
     }
     catch (const std::exception& err)

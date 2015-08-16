@@ -6,14 +6,7 @@
  */
 
 #include <Abacus/Abacus.h>
-#include <iostream>
-#include <sstream>
-#include <algorithm>
-#include <cctype>
-#include <locale>
-#include <functional>
 
-#include "Beautifier.h"
 #include "Parser.h"
 #include "Computer.h"
 #include "../sources/precpkg/fprecision.h"
@@ -40,12 +33,7 @@ static std::string ComputeIntern(const std::string& expr, ConstantsSet* constant
     Computer comp;
     ConstantsSet tempConstSet;
 
-    auto result = comp.ComputeExpr(expr, (constantsSet != nullptr ? *constantsSet : tempConstSet), log);
-
-    /* Beautify result literal string */
-    BeautifyLiteral(result);
-
-    return result;
+    return comp.ComputeExpr(expr, (constantsSet != nullptr ? *constantsSet : tempConstSet), log);
 }
 
 AC_EXPORT std::string Compute(const std::string& expr, Log* log)
