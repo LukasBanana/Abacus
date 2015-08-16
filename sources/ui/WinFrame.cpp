@@ -146,6 +146,13 @@ bool WinFrame::ExecExpr(const std::string& expr)
     return true;
 }
 
+void WinFrame::Finalize()
+{
+    Show();
+    inCtrl_->SelectNone();
+    inCtrl_->SetInsertionPoint(cursorPos_);
+}
+
 
 /*
  * ======= Private: =======
@@ -440,6 +447,7 @@ bool WinFrame::SaveConfig(const std::string& filename)
 
     /* Store last input */
     W("$input", inCtrl_->GetValue().ToStdString());
+    W("$cursor", std::to_string(inCtrl_->GetInsertionPoint()));
 
     /* Store history */
     std::size_t historyIdx = 0;
@@ -519,6 +527,8 @@ bool WinFrame::LoadConfig(const std::string& filename)
                 SetSize(wxSize(GetSize().GetWidth(), RInt()));
             else if (ident == "$input")
                 SetInput(value);
+            else if (ident == "$cursor")
+                cursorPos_ = RInt();
             else if (ident.size() > 9 && ident.substr(0, 9) == "$history_")
                 inCtrl_->GetHistory().Add(value);
         }

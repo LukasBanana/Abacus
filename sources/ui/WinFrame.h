@@ -35,6 +35,8 @@ class WinFrame : public wxFrame
 
         bool ExecExpr(const std::string& expr);
 
+        void Finalize();
+
     private:
         
         void CreateFont();
@@ -74,6 +76,8 @@ class WinFrame : public wxFrame
         wxStatusBar*                    statusBar_  = nullptr;
 
         Ac::ConstantsSet                constantsSet_;
+
+        long                            cursorPos_  = 0;
 
         #ifdef AC_MULTI_THREADED
         std::unique_ptr<std::thread>    thread_;

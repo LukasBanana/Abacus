@@ -21,7 +21,7 @@ class AbacusApp : public wxApp
                 return false;
                 
             auto frame = new WinFrame("Abacus", wxDefaultPosition, wxSize(600, 250));
-            frame->Show(true);
+            frame->Finalize();
 
             return true;
         }

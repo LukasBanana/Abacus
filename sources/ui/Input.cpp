@@ -151,6 +151,12 @@ void Input::Insert(char chr)
     StoreTemp();
 }
 
+void Input::Insert(const wxString& str)
+{
+    WriteText(str);
+    StoreTemp();
+}
+
 void Input::Erase(long dir)
 {
     /* Get previous selection */
@@ -210,6 +216,30 @@ void Input::HistoryNext()
         Replace(tempInput_);
 }
 
+std::pair<long, long> Input::GetSelectionRange() const
+{
+    long from, to;
+    GetSelection(&from, &to);
+    return { from, to };
+}
+
+bool Input::IsAllSelected() const
+{
+    auto range = GetSelectionRange();
+    return range.first == 0 && range.second == GetLastPosition();
+}
+
+void Input::SwitchSelectAll()
+{
+    if (IsAllSelected())
+    {
+        SelectNone();
+        SetInsertionPoint(selStart_);
+    }
+    else
+        SelectAll();
+}
+
 void Input::StoreTemp()
 {
     tempInput_ = Get();
@@ -245,21 +275,22 @@ void Input::OnChar(wxKeyEvent& event)
         switch (key)
         {
             case WXK_CONTROL_A:
-                SetSelection(0, GetLastPosition());
-                break;
-            case WXK_CONTROL_C:
-                wxClipboard::Get()->SetData(new wxTextDataObject(Get()));
+                SwitchSelectAll();
                 break;
             case WXK_CONTROL_X:
-                wxClipboard::Get()->SetData(new wxTextDataObject(Get()));
-                Replace("");
+                Cut();
+                break;
+            case WXK_CONTROL_C:
+                Copy();
                 break;
             case WXK_CONTROL_V:
-                {
-                    wxTextDataObject data;
-                    if (wxClipboard::Get()->GetData(data))
-                        Replace(data.GetText().ToStdString());
-                }
+                Paste();
+                break;
+            case WXK_CONTROL_Z:
+                Undo();
+                break;
+            case WXK_CONTROL_Y:
+                Redo();
                 break;
         }
     }

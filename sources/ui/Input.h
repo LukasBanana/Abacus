@@ -52,11 +52,16 @@ class Input : public wxTextCtrl
         void LocateCursor(long pos, bool shift);
         
         void Insert(char chr);
+        void Insert(const wxString& str);
         void Erase(long dir);
 
         void Enter();
         void HistoryPrev();
         void HistoryNext();
+
+        std::pair<long, long> GetSelectionRange() const;
+        bool IsAllSelected() const;
+        void SwitchSelectAll();
 
         void StoreTemp();
 
