@@ -32,6 +32,10 @@ class Input : public wxTextCtrl
 
         void Replace(std::string s);
 
+        void Cut() override;
+        void Copy() override;
+        void Paste() override;
+
         std::string Get() const;
 
         const HistoryType& GetHistory() const

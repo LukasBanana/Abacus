@@ -62,6 +62,36 @@ void Input::Replace(std::string s)
     SetInsertionPoint(ClampPos(pos));
 }
 
+void Input::Cut()
+{
+    Copy();
+
+    /* Remove selected text */
+    long from, to;
+    GetSelection(&from, &to);
+    Remove(from, to);
+}
+
+void Input::Copy()
+{
+    /* Copy adjusted selection to clipboard */
+    std::string s = GetStringSelection().ToStdString();
+    AdjustExprOut(s);
+    wxClipboard::Get()->SetData(new wxTextDataObject(s));
+}
+
+void Input::Paste()
+{
+    wxTextDataObject data;
+    if (wxClipboard::Get()->GetData(data))
+    {
+        /* Paste text from clipboard */
+        std::string s = data.GetText().ToStdString();
+        AdjustExprIn(s);
+        Insert(s);
+    }
+}
+
 std::string Input::Get() const
 {
     auto s = GetValue().ToStdString();
