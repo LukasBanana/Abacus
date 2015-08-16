@@ -140,7 +140,7 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
             value.Factorial();
             break;
         case Op::Norm:
-            value.Normalize();
+            value.Norm();
             break;
     }
 }
@@ -236,15 +236,33 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
             Error("function '" + ast->name + "' requires at least 1 argument, but 0 are specified");
     };
 
-    auto Param = [&](std::size_t i) -> float_precision
+    auto Param = [&](std::size_t i) -> const float_precision&
     {
         /* Evaluate argument */
         Visit(ast->args[i]);
         auto val = Pop();
 
+        /* Check if this is a scalar */
+        if (!val.IsScalar())
+            Error("function '" + ast->name + "' requires arguments of a scalar type");
+
         /* Return float precision value */
         val.ToFloat();
         return val.GetFloat();
+    };
+
+    auto VecParam = [&](std::size_t i) -> Variable
+    {
+        /* Evaluate argument */
+        Visit(ast->args[i]);
+        auto val = Pop();
+
+        /* Check if this is a scalar */
+        if (!val.IsVector())
+            Error("function '" + ast->name + "' requires arguments of a vector type");
+
+        /* Return float precision value */
+        return val;
     };
 
     if (f == "sin")
@@ -404,6 +422,13 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         }
 
         Push(result);
+    }
+    else if (f == "norm")
+    {
+        ParamCount(1);
+        auto& var = VecParam(0);
+        var.Norm();
+        Push(var);
     }
     else
         Error("unknown function '" + f + "'");

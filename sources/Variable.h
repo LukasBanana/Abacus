@@ -31,6 +31,8 @@ class Variable
         Variable(const float_precision& fprec);
         Variable(const std::string& value);
 
+        /* --- Scalar functions --- */
+
         void Add(Variable& rhs);
         void Sub(Variable& rhs);
         void Mul(Variable& rhs);
@@ -42,15 +44,21 @@ class Variable
         void Min(Variable& rhs);
         void Max(Variable& rhs);
 
+        void Negate();
+        void Factorial();
+        void Norm();
+        void Sign();
+
+        /* --- Vector functions --- */
+
+        void VecNorm();
+
+        /* --- Misc --- */
+
         void ToFloat();
         void ToInt();
 
         void Unify(Variable& rhs);
-
-        void Negate();
-        void Factorial();
-        void Normalize();
-        void Sign();
 
         std::string ToString() const;
 

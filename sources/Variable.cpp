@@ -12,6 +12,11 @@ namespace Ac
 {
 
 
+static void Error(const std::string& msg)
+{
+    throw std::runtime_error("math error: " + msg);
+}
+
 Variable::Variable(std::vector<Variable>&& vector) :
     vector_( std::move(vector) )
 {
@@ -28,6 +33,8 @@ Variable::Variable(const float_precision& fprec) :
     isFloat_( true  )
 {
 }
+
+/* --- Scalar functions --- */
 
 static bool IsStrFloat(const std::string& s)
 {
@@ -150,33 +157,6 @@ void Variable::Max(Variable& rhs)
     }
 }
 
-void Variable::ToFloat()
-{
-    if (!isFloat_)
-    {
-        auto ival = iprec_.toString();
-        fprec_ = float_precision(ival.c_str());
-        isFloat_ = true;
-    }
-}
-
-void Variable::ToInt()
-{
-    if (isFloat_)
-    {
-        iprec_ = fprec_.to_int_precision();
-        isFloat_ = false;
-    }
-}
-
-void Variable::Unify(Variable& rhs)
-{
-    if (isFloat_ && !rhs.isFloat_)
-        rhs.ToFloat();
-    else if (!isFloat_ && rhs.isFloat_)
-        ToFloat();
-}
-
 void Variable::Negate()
 {
     if (isFloat_)
@@ -217,9 +197,29 @@ void Variable::Factorial()
     IntPrecFactorial(iprec_);
 }
 
-void Variable::Normalize()
+/* --- Vector functions --- */
+
+void Variable::Norm()
 {
-    if (isFloat_)
+    if (IsVector())
+    {
+        auto vec = std::move(vector_);
+        ToFloat();
+        
+        for (auto& v : vec)
+        {
+            if (!v.IsScalar())
+                Error("can not compute norm of vector with non-scalar components");
+
+            v.ToFloat();
+            v.Mul(v);
+
+            Add(v);
+        }
+
+        fprec_ = sqrt(fprec_);
+    }
+    else if (IsFloat())
         fprec_ = abs(fprec_);
     else
         iprec_ = abs(iprec_);
@@ -249,6 +249,35 @@ void Variable::Sign()
     /* Store integer value */
     ToInt();
     iprec_ = sgn;
+}
+
+/* --- Misc --- */
+
+void Variable::ToFloat()
+{
+    if (!isFloat_)
+    {
+        auto ival = iprec_.toString();
+        fprec_ = float_precision(ival.c_str());
+        isFloat_ = true;
+    }
+}
+
+void Variable::ToInt()
+{
+    if (isFloat_)
+    {
+        iprec_ = fprec_.to_int_precision();
+        isFloat_ = false;
+    }
+}
+
+void Variable::Unify(Variable& rhs)
+{
+    if (isFloat_ && !rhs.isFloat_)
+        rhs.ToFloat();
+    else if (!isFloat_ && rhs.isFloat_)
+        ToFloat();
 }
 
 std::string Variable::ToString() const
