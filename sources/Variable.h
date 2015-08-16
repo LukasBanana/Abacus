@@ -13,6 +13,7 @@
 #include "precpkg/fprecision.h"
 
 #include <string>
+#include <vector>
 
 
 namespace Ac
@@ -23,7 +24,9 @@ class Variable
 {
             
     public:
-                
+        
+        Variable() = default;
+        Variable(std::vector<Variable>&& vector);
         Variable(const int_precision& iprec);
         Variable(const float_precision& fprec);
         Variable(const std::string& value);
@@ -49,7 +52,9 @@ class Variable
         void Normalize();
         void Sign();
 
-        operator std::string ();
+        std::string ToString() const;
+
+        operator std::string () const;
 
         const int_precision& GetInt() const
         {
@@ -61,16 +66,37 @@ class Variable
             return fprec_;
         }
 
+        const std::vector<Variable>& GetVector() const
+        {
+            return vector_;
+        }
+
+        std::vector<Variable>& GetVector()
+        {
+            return vector_;
+        }
+
+        bool IsVector() const
+        {
+            return !vector_.empty();
+        }
+
+        bool IsScalar() const
+        {
+            return !IsVector();
+        }
+
         bool IsFloat() const
         {
             return isFloat_;
         }
 
     private:
-                
-        int_precision   iprec_;
-        float_precision fprec_;
-        bool            isFloat_ = false;
+
+        int_precision           iprec_;
+        float_precision         fprec_;
+        bool                    isFloat_ = false;
+        std::vector<Variable>   vector_;
 
 };
 

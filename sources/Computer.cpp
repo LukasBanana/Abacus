@@ -21,6 +21,34 @@ static void LogError(Log* log, const std::string& msg)
         log->Error(msg);
 }
 
+static std::string AdjustResult(const Variable& result)
+{
+    std::string s;
+
+    if (result.IsVector())
+    {
+        const auto& vec = result.GetVector();
+        s = "[ ";
+
+        for (std::size_t i = 0, n = vec.size(); i < n; ++i)
+        {
+            s += AdjustResult(vec[i]);
+            if (i + 1 < n)
+                s += ", ";
+        }
+
+        s += " ]";
+        return s;
+    }
+    else
+    {
+        s = result;
+        BeautifyLiteral(s);
+    }
+
+    return s;
+}
+
 std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log)
 {
     /* Setup constant set */
@@ -32,14 +60,9 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constan
         auto ast = ParseExpression(expr, log);
         if (ast)
         {
-            /* Compute AST */
+            /* Compute AST and return (beautified) result */
             Visit(ast);
-
-            /* Return (beautified) result */
-            std::string result = Pop();
-            BeautifyLiteral(result);
-
-            return result;
+            return AdjustResult(Top());
         }
     }
     catch (const std::exception& err)
@@ -456,7 +479,15 @@ void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
 
 void Computer::VisitVectorExpr(VectorExpr* ast, void* args)
 {
-    //todo...
+    std::vector<Variable> vector(ast->components.size());
+
+    for (std::size_t i = 0, n = ast->components.size(); i < n; ++i)
+    {
+        Visit(ast->components[i]);
+        vector[i] = Pop();
+    }
+
+    Push(Variable(std::move(vector)));
 }
 
 void Computer::VisitDefExpr(DefExpr* ast, void* args)

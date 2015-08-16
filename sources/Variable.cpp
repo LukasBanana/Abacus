@@ -12,6 +12,11 @@ namespace Ac
 {
 
 
+Variable::Variable(std::vector<Variable>&& vector) :
+    vector_( std::move(vector) )
+{
+}
+
 Variable::Variable(const int_precision& iprec) :
     iprec_  ( iprec ),
     isFloat_( false )
@@ -246,9 +251,14 @@ void Variable::Sign()
     iprec_ = sgn;
 }
 
-Variable::operator std::string ()
+std::string Variable::ToString() const
 {
-    return isFloat_ ? fprec_.toString() : iprec_.toString();
+    return IsFloat() ? fprec_.toString() : iprec_.toString();
+}
+
+Variable::operator std::string () const
+{
+    return ToString();
 }
 
 
