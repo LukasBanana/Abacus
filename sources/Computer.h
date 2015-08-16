@@ -28,7 +28,7 @@ class Computer : private Visitor
     public:
         
         std::string ComputeExpr(
-            const std::string& expr, ConstantsSet* constantsSet = nullptr, Log* log = nullptr
+            const std::string& expr, ConstantsSet& constantsSet, Log* log = nullptr
         );
 
     private:
@@ -42,9 +42,13 @@ class Computer : private Visitor
         void VisitFuncExpr      ( FuncExpr*     ast, void* args ) override;
         void VisitFoldExpr      ( FoldExpr*     ast, void* args ) override;
         void VisitVectorExpr    ( VectorExpr*   ast, void* args ) override;
+        void VisitDefExpr       ( DefExpr*      ast, void* args ) override;
 
         void Push(const Variable& value);
         Variable Pop();
+        Variable Top();
+
+        void StoreConst(const std::string& ident, std::string value);
 
         std::stack<Variable>    values_;
         ConstantsSet*           constantsSet_;

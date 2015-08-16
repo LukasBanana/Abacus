@@ -6,6 +6,7 @@
  */
 
 #include "Computer.h"
+#include "Beautifier.h"
 
 #include <random>
 
@@ -22,14 +23,10 @@ static void LogError(Log* log, const std::string& msg)
         log->Error(msg);
 }
 
-std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet* constantsSet, Log* log)
+std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log)
 {
     /* Setup constant set */
-    ConstantsSet tempConstSet;
-
-    constantsSet_ = constantsSet;
-    if (!constantsSet_)
-        constantsSet_ = &tempConstSet;
+    constantsSet_ = &constantsSet;
 
     try
     {
@@ -175,19 +172,14 @@ void Computer::VisitLiteralExpr(LiteralExpr* ast, void* args)
 void Computer::VisitIdentExpr(IdentExpr* ast, void* args)
 {
     /* Try to find constant */
-    if (constantsSet_)
+    auto it = constantsSet_->constants.find(ast->value);
+    if (it != constantsSet_->constants.end())
     {
-        auto it = constantsSet_->constants.find(ast->value);
-        if (it != constantsSet_->constants.end())
-        {
-            /* Push value onto stack */
-            Push(Variable(it->second));
-        }
-        else
-            Error("undefined constant '" + ast->value + "'");
+        /* Push value onto stack */
+        Push(Variable(it->second));
     }
     else
-        Error("no constants defined");
+        Error("undefined constant '" + ast->value + "'");
 }
 
 void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
@@ -407,7 +399,7 @@ void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
     while (idx <= idxEnd)
     {
         /* Setup new value for index variable */
-        constantsSet_->constants[ast->index] = idx.toString();
+        StoreConst(ast->index, idx.toString());
 
         /* Compute current iteration */
         Visit(ast->loopExpr);
@@ -431,6 +423,16 @@ void Computer::VisitVectorExpr(VectorExpr* ast, void* args)
     //todo...
 }
 
+void Computer::VisitDefExpr(DefExpr* ast, void* args)
+{
+    /* Compute definition value */
+    Visit(ast->expr);
+    auto value = Top();
+
+    /* Store (beautified) result in constant */
+    StoreConst(ast->ident, value);
+}
+
 void Computer::Push(const Variable& value)
 {
     values_.push(value);
@@ -443,6 +445,19 @@ Variable Computer::Pop()
     auto val = values_.top();
     values_.pop();
     return val;
+}
+
+Variable Computer::Top()
+{
+    if (values_.empty())
+        Error("empty stack");
+    return values_.top();
+}
+
+void Computer::StoreConst(const std::string& ident, std::string value)
+{
+    BeautifyLiteral(value);
+    constantsSet_->constants[ident] = value;
 }
 
 

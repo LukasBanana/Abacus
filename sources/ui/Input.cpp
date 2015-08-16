@@ -177,13 +177,16 @@ void Input::Enter()
     if (callback_)
         callback_(s);
 
-    #if 0//todo -> make this optional for the user!!!
-    /* Select all to make removal for user easier */
-    SelectAll();
-    #endif
+    if (!s.empty())
+    {
+        #if 0//todo -> make this optional for the user!!!
+        /* Select all to make removal for user easier */
+        SelectAll();
+        #endif
 
-    /* Store value in history */
-    history_.Add(s);
+        /* Store value in history */
+        history_.Add(s);
+    }
 }
 
 void Input::HistoryPrev()

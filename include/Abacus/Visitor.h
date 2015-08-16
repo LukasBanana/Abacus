@@ -23,6 +23,7 @@ struct IdentExpr;
 struct FuncExpr;
 struct FoldExpr;
 struct VectorExpr;
+struct DefExpr;
 
 class Visitor
 {
@@ -40,6 +41,7 @@ class Visitor
         virtual void VisitFuncExpr      ( FuncExpr*     ast, void* args ) = 0;
         virtual void VisitFoldExpr      ( FoldExpr*     ast, void* args ) = 0;
         virtual void VisitVectorExpr    ( VectorExpr*   ast, void* args ) = 0;
+        virtual void VisitDefExpr       ( DefExpr*      ast, void* args ) = 0;
 
     protected:
 

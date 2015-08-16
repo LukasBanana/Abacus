@@ -87,6 +87,9 @@ class Parser : public ExprProcessor
 
         BinaryExpr::Operators GetBinaryOperator(const std::string& spell);
 
+        ExprPtr Parse();
+
+        ExprPtr ParseDef(const ExprPtr& identExpr);
         ExprPtr ParseExpr();
 
         ExprPtr ParseAbstractBinaryExpr(

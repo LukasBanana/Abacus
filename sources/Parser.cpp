@@ -27,7 +27,7 @@ std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
 
     try
     {
-        auto ast = ParseExpr();
+        auto ast = Parse();
         
         if (!scanner_.HasSucceeded())
             return nullptr;
@@ -96,6 +96,33 @@ BinaryExpr::Operators Parser::GetBinaryOperator(const std::string& spell)
     if (op == BinaryExpr::Operators::__Unknown__)
         Error("invalid binary operator: " + spell);
     return op;
+}
+
+// program: (expr | def) EOF;
+ExprPtr Parser::Parse()
+{
+    auto ast = ParseExpr();
+
+    if (Is(Tokens::Equal))
+        return ParseDef(ast);
+
+    return ast;
+}
+
+// def: (IDENT '=')+ expr;
+ExprPtr Parser::ParseDef(const ExprPtr& identExpr)
+{
+    if (!identExpr || identExpr->Type() != Expr::Types::Ident)
+        Error("expression can only be assigned to an identifier");
+
+    Accept(Tokens::Equal);
+
+    auto ast = Make<DefExpr>();
+            
+    ast->ident = static_cast<IdentExpr*>(identExpr.get())->value;
+    ast->expr = Parse();
+
+    return ast;
 }
 
 // expr: add_expr;

@@ -4,8 +4,9 @@
 
 grammar Abacus;
 
-program: expr EOF;
+program:			(expr | def) EOF;
 
+def:				(IDENT '=')+ expr;
 expr:				add_expr;
 
 add_expr:			sub_expr ('+' sub_expr)*;
@@ -44,33 +45,35 @@ FOLD_IDENT			: 'sum'
 argument_list:		'(' expr_list? ')';
 expr_list:			expr (',' expr)*;
 
-SHIFT_OP	: LSHIFT_OP
-			| RSHIFT_OP;
+SHIFT_OP			: LSHIFT_OP
+					| RSHIFT_OP;
 
-LSHIFT_OP:	'<<';
-RSHIFT_OP:	'<<';
+LSHIFT_OP:			'<<';
+RSHIFT_OP:			'<<';
 
-BIN_DIGIT:	[01];
-OCT_DIGIT:	[0-7];
-DEC_DIGIT:	[0-9];
-HEX_DIGIT:	[0-9a-fA-F];
+BIN_DIGIT:			[01];
+OCT_DIGIT:			[0-7];
+DEC_DIGIT:			[0-9];
+HEX_DIGIT:			[0-9a-fA-F];
 
-BIN_LITERAL:	'0b' BIN_DIGIT+;
-OCT_LITERAL:	'0o' OCT_DIGIT+;
-DEC_LITERAL:	DEC_DIGIT+;
-HEX_LITERAL:	'0x' HEX_DIGIT+;
+BIN_LITERAL:		'0b' BIN_DIGIT+;
+OCT_LITERAL:		'0o' OCT_DIGIT+;
+DEC_LITERAL:		DEC_DIGIT+;
+HEX_LITERAL:		'0x' HEX_DIGIT+;
 
-INT_LITERAL	: BIN_LITERAL
-			| OCT_LITERAL
-			| DEC_LITERAL
-			| HEX_LITERAL;
+INT_LITERAL			: BIN_LITERAL
+					| OCT_LITERAL
+					| DEC_LITERAL
+					| HEX_LITERAL;
 
-FLOAT_LITERAL:	DEC_LITERAL '.' DEC_LITERAL;
+FLOAT_LITERAL:		DEC_LITERAL '.' DEC_LITERAL;
 
-LETTER:	'a' - 'z' | 'A' - 'Z';
-IDENT:	LETTER+;
+LETTER				: 'a' - 'z'
+					| 'A' - 'Z';
+
+IDENT:				LETTER+;
 
 // WHITE SPACES & COMMENTS
-WS: [ \t\r\n]+ -> skip;									// Skip white spaces
+WS:					[ \t\r\n]+ -> skip; // Skip white spaces
 
 

@@ -47,6 +47,7 @@ struct Expr
         Func,
         Fold,
         Vector,
+        Def,
     };
 
     Expr(const StreamPosition& pos) :
@@ -149,6 +150,14 @@ struct VectorExpr : public Expr
     __AC_AST_INTERFACE__(Vector);
 
     std::vector<ExprPtr> components; // expressions of the vector components
+};
+
+struct DefExpr : public Expr
+{
+    __AC_AST_INTERFACE__(Def);
+
+    std::string ident;
+    ExprPtr     expr;
 };
 
 

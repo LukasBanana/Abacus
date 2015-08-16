@@ -91,6 +91,13 @@ class Printer : public Visitor
                 Visit(comp);
         }
 
+        void VisitDefExpr(DefExpr* ast, void* args) override
+        {
+            log_.Info("Def Expr: " + ast->ident);
+            auto dummy = log_.Indent();
+            Visit(ast->expr);
+        }
+
     private:
         
         LogOutput& log_;
