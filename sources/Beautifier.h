@@ -16,7 +16,7 @@ namespace Ac
 {
 
 
-void BeautifyLiteral(std::string& s);
+void BeautifyLiteral(std::string& s, std::size_t maxExp = 10);
 
 
 } // /namespace Ac

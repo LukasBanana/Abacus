@@ -15,8 +15,6 @@ namespace Ac
 {
 
 
-static const char* expConst = "2.7182818284590452353602874713526";
-
 static void LogError(Log* log, const std::string& msg)
 {
     if (log)

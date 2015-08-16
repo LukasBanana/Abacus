@@ -116,6 +116,12 @@ bool WinFrame::ExecExpr(const std::string& expr)
         ShowDemo();
     else if (expr == "const")
         ShowConstants();
+    else if (expr == "clear")
+    {
+        constantsSet_.constants.clear();
+        constantsSet_.ResetStd();
+        ShowConstants();
+    }
     else
     {
         /* Show status message */
@@ -318,6 +324,7 @@ void WinFrame::ShowInfo()
         Info.Add("Special Input:");
         Info.Add("  exit                Quit application");
         Info.Add("  const               Shows all stored constants");
+        Info.Add("  clear               Clears all stored constants");
         Info.Add("  demo                Shows the next expresion for demonstration");
     }
     SetOutput(Info);
@@ -461,15 +468,6 @@ bool WinFrame::SaveConfig(const std::string& filename)
     return true;
 }
 
-template <typename T>
-T Num(const std::string& s)
-{
-    T val = T(0);
-    std::istringstream stream(s);
-    stream >> val;
-    return val;
-}
-
 bool WinFrame::LoadConfig(const std::string& filename)
 {
     /* Open file for writing */
@@ -498,7 +496,10 @@ bool WinFrame::LoadConfig(const std::string& filename)
 
     auto RInt = [&value]()
     {
-        return Num<int>(value);
+        int i = 0;
+        std::istringstream stream(value);
+        stream >> i;
+        return i;
     };
 
     /* Read file content */

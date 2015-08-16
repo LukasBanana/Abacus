@@ -6,27 +6,16 @@
  */
 
 #include "Beautifier.h"
-#include "precpkg/iprecision.h"
+
+#include <sstream>
+#include <algorithm>
 
 
 namespace Ac
 {
 
 
-static bool Replace(std::string& str, const std::string& from, const std::string& to)
-{
-    size_t pos = str.find(from);
-
-    if (pos != std::string::npos)
-    {
-        str.replace(pos, from.size(), to);
-        return true;
-    }
-
-    return false;
-}
-
-void BeautifyLiteral(std::string& s)
+void BeautifyLiteral(std::string& s, std::size_t maxExp)
 {
     if (s.empty())
         return;
@@ -36,22 +25,78 @@ void BeautifyLiteral(std::string& s)
         s.erase(s.begin());
 
     /* Find 'E' */
-    auto pos = s.find('E');
-    if (pos == std::string::npos)
+    auto posE = s.find('E');
+    if (posE == std::string::npos)
         return;
 
     /* Get exponent value */
-    auto expStr = s.substr(pos + 1);
+    auto expStr = s.substr(posE + 1);
+    auto posDot = s.find('.');
 
-    if (expStr == "0")
+    if (expStr.size() < 4)
     {
-        /* Remove last two characters "E0" */
-        s.resize(s.size() - 2);
-        return;
+        /* Get exponent as integer */
+        int exp = 0;
+        std::istringstream stream(expStr);
+        stream >> exp;
+
+        if (static_cast<std::size_t>(std::abs(exp)) < maxExp)
+        {
+            /* Remove last characters "E0", "E-1", "E1" etc. */
+            s.resize(s.size() - expStr.size() - 1);
+
+            if (exp != 0)
+            {
+                /* Insert missing '.' */
+                if (posDot == std::string::npos)
+                {
+                    posDot = posE;
+                    s.insert(s.begin() + posDot, '.');
+                }
+
+                while (exp > 0)
+                {
+                    /* Move '.' right */
+                    if (posDot + 1 < s.size())
+                        std::swap(s[posDot], s[posDot + 1]);
+                    else if (posDot + 1 == s.size())
+                    {
+                        s.pop_back();
+                        s.push_back('0');
+                    }
+                    else
+                        s.push_back('0');
+                    --exp;
+                    ++posDot;
+                }
+
+                while (exp < 0)
+                {
+                    /* Move '.' left */
+                    if (posDot > 1)
+                    {
+                        std::swap(s[posDot - 1], s[posDot]);
+                        --posDot;
+                    }
+                    else if (posDot == 1)
+                    {
+                        std::swap(s[0], s[1]);
+                        s.insert(s.begin(), '0');
+                        --posDot;
+                    }
+                    else
+                        s.insert(s.begin() + 2, '0');
+
+                    ++exp;
+                }
+            }
+
+            return;
+        }
     }
 
     /* Replace 'E' by " * 10^" */
-    s.replace(pos, 1, " * 10^");
+    s.replace(posE, 1, " * 10^");
 }
 
 
