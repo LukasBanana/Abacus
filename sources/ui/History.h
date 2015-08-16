@@ -25,7 +25,7 @@ class History
                 values_.push_back(value);
 
             /* Get index to last entry */
-            idx_ = values_.size() - 1;
+            idx_ = values_.size();
 
             /* Remove first element if list is too long */
             if (values_.size() > N)
@@ -34,7 +34,7 @@ class History
 
         bool Get(T& value)
         {
-            if (!values_.empty())
+            if (!values_.empty() && idx_ < values_.size())
             {
                 value = values_[idx_];
                 return true;
@@ -50,7 +50,7 @@ class History
 
         void Next()
         {
-            if (idx_ + 1 < values_.size())
+            if (idx_ < values_.size())
                 ++idx_;
         }
 
@@ -61,7 +61,7 @@ class History
 
         bool IsEnd() const
         {
-            return idx_ + 1 == values_.size();
+            return idx_ == values_.size();
         }
 
         const std::vector<T>& GetValues() const

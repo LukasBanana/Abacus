@@ -407,22 +407,49 @@ void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
     bool isSum = (ast->func == "sum");
     Variable result(std::string(isSum ? "0" : "1"));
 
-    while (idx <= idxEnd)
+    if (idxEnd >= idx)
     {
-        /* Setup new value for index variable */
-        StoreConst(ast->index, idx.toString());
+        if ( isSum && ast->loopExpr->Type() == Expr::Types::Ident &&
+             static_cast<IdentExpr*>(ast->loopExpr.get())->value == ast->index &&
+             idx >= 0 )
+        {
+            /* Apply gaussian sum formula: 1 + 2 + ... + n = n(n+1)/2 */
+            const int_precision one(1), two(2);
+            idxEnd = (idxEnd*(idxEnd + one)) / two;
 
-        /* Compute current iteration */
-        Visit(ast->loopExpr);
-        auto val = Pop();
-        
-        /* Fold with result */
-        if (isSum)
-            result.Add(val);
+            if (idx > 1)
+            {
+                /*
+                Subtract overplus if index variable starts with value > 1:
+                k + (k+1) + ... + n = n(n+1)/2 - (k-1)k/2
+                */
+                idx = ((idx - one)*idx)/two;
+                idxEnd -= idx;
+            }
+
+            /* Set result */
+            result = Variable(idxEnd);
+        }
         else
-            result.Mul(val);
+        {
+            while (idx <= idxEnd)
+            {
+                /* Setup new value for index variable */
+                StoreConst(ast->index, idx.toString());
 
-        ++idx;
+                /* Compute current iteration */
+                Visit(ast->loopExpr);
+                auto val = Pop();
+        
+                /* Fold with result */
+                if (isSum)
+                    result.Add(val);
+                else
+                    result.Mul(val);
+
+                ++idx;
+            }
+        }
     }
 
     /* Return result */

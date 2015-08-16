@@ -148,6 +148,7 @@ void Input::LocateCursor(long pos, bool shift)
 void Input::Insert(char chr)
 {
     WriteText(wxString(1, chr));
+    StoreTemp();
 }
 
 void Input::Erase(long dir)
@@ -167,6 +168,8 @@ void Input::Erase(long dir)
         else if (dir > 0 && pos < GetLastPosition())
             Remove(pos, std::min(pos + dir, GetLastPosition()));
     }
+
+    StoreTemp();
 }
 
 void Input::Enter()
@@ -199,15 +202,12 @@ void Input::HistoryPrev()
 
 void Input::HistoryNext()
 {
-    if (history_.IsEnd())
-        Replace(tempInput_);
+    history_.Next();
+    std::string s;
+    if (history_.Get(s))
+        Replace(s);
     else
-    {
-        history_.Next();
-        std::string s;
-        if (history_.Get(s))
-            Replace(s);
-    }
+        Replace(tempInput_);
 }
 
 void Input::StoreTemp()
