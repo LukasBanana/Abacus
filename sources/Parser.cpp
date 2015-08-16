@@ -209,6 +209,8 @@ ExprPtr Parser::ParseValueExpr()
             return ParseNormExpr();
         case Tokens::FoldFunc:
             return ParseFoldExpr();
+        case Tokens::OpenParen:
+            return ParseVectorExpr();
     }
     return ParseIdentExpr();
 }
@@ -354,6 +356,20 @@ ExprPtr Parser::ParseFoldExpr()
     Accept(Tokens::CloseParen);
 
     ast->loopExpr = ParseMulExpr();
+
+    return ast;
+}
+
+// vector_expr: '[' expr_list ']';
+ExprPtr Parser::ParseVectorExpr()
+{
+    auto ast = Make<VectorExpr>();
+
+    Accept(Tokens::OpenParen);
+    
+    ast->components = ParseExprList();
+
+    Accept(Tokens::CloseParen);
 
     return ast;
 }

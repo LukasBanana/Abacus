@@ -115,6 +115,7 @@ class Parser : public ExprProcessor
         ExprPtr ParseIdentExpr();
         ExprPtr ParseNormExpr();
         ExprPtr ParseFoldExpr();
+        ExprPtr ParseVectorExpr();
 
         ExprPtr ParseFuncExpr(std::string&& name, bool singleParam = false);
 
