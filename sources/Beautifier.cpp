@@ -49,47 +49,61 @@ void BeautifyLiteral(std::string& s, std::size_t maxExp)
             /* Remove last characters "E0", "E-1", "E1" etc. */
             s.resize(s.size() - expStr.size() - 1);
 
-            if (exp != 0)
+            if (exp > 0)
             {
-                /* Insert missing '.' */
+                if (posDot == std::string::npos)
+                    s += std::string(exp, '0');
+                else
+                {
+                    while (exp > 0)
+                    {
+                        /* Move '.' right */
+                        if (posDot + 1 < s.size())
+                            std::swap(s[posDot], s[posDot + 1]);
+
+                        ++posDot;
+                        --exp;
+
+                        /* Remove '.' if end has reached and append remaining zeros */
+                        if (s.back() == '.')
+                        {
+                            s.pop_back();
+                            s += std::string(exp, '0');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            /* Insert missing '.' */
+            if (exp < 0)
+            {
                 if (posDot == std::string::npos)
                 {
                     posDot = posE;
                     s.insert(s.begin() + posDot, '.');
                 }
 
-                while (exp > 0)
-                {
-                    /* Move '.' right */
-                    if (posDot + 1 < s.size())
-                        std::swap(s[posDot], s[posDot + 1]);
-                    else if (posDot + 1 == s.size())
-                    {
-                        s.pop_back();
-                        s.push_back('0');
-                    }
-                    else
-                        s.push_back('0');
-                    --exp;
-                    ++posDot;
-                }
-
                 while (exp < 0)
                 {
-                    /* Move '.' left */
                     if (posDot > 1 + signChars)
                     {
+                        /* Move '.' left */
                         std::swap(s[posDot - 1], s[posDot]);
                         --posDot;
                     }
                     else if (posDot == 1 + signChars)
                     {
+                        /* Move '.' left and insert zero after '.' */
                         std::swap(s[posDot - 1], s[posDot]);
                         s.insert(s.begin() + signChars, '0');
                         --posDot;
                     }
                     else
+                    {
+                        /* Insert zero after '.' */
                         s.insert(s.begin() + 2 + signChars, '0');
+                    }
 
                     ++exp;
                 }
