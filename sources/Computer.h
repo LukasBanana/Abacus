@@ -46,7 +46,7 @@ class Computer : private Visitor
 
         void Push(const Variable& value);
         Variable Pop();
-        Variable Top();
+        Variable& Top();
 
         void StoreConst(const std::string& ident, std::string value);
 

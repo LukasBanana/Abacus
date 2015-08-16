@@ -74,16 +74,17 @@ struct UnaryExpr : public Expr
     enum class Operators
     {
         __Unknown__,
-        Negate,
-        Factorial,
-        Norm,
+        Keep,       // +
+        Negate,     // -
+        Factorial,  // !
+        Norm,       // |.|
     };
 
     static AC_EXPORT Operators GetOperator(const std::string& spell);
     static AC_EXPORT std::string GetOperatorSpell(const Operators op);
 
     std::shared_ptr<Expr>   expr;
-    Operators               op = Operators::Negate;
+    Operators               op = Operators::__Unknown__;
 };
 
 struct BinaryExpr : public Expr
@@ -107,7 +108,7 @@ struct BinaryExpr : public Expr
     static AC_EXPORT std::string GetOperatorSpell(const Operators op);
 
     std::shared_ptr<Expr>   exprL;
-    Operators               op = Operators::Add;
+    Operators               op = Operators::__Unknown__;
     std::shared_ptr<Expr>   exprR;
 };
 

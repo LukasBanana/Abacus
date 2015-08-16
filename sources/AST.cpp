@@ -18,6 +18,8 @@ using UnaryOp = UnaryExpr::Operators;
 
 AC_EXPORT UnaryExpr::Operators UnaryExpr::GetOperator(const std::string& spell)
 {
+    if (spell == "+")
+        return UnaryOp::Keep;
     if (spell == "-")
         return UnaryOp::Negate;
     if (spell == "!")
@@ -31,6 +33,8 @@ AC_EXPORT std::string UnaryExpr::GetOperatorSpell(const Operators op)
 {
     switch (op)
     {
+        case UnaryOp::Keep:
+            return "+";
         case UnaryOp::Negate:
             return "-";
         case UnaryOp::Factorial:

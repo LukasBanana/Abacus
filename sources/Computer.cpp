@@ -102,13 +102,16 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
 {
     /* Evaluate sub expressions */
     Visit(ast->expr);
-    auto value = Pop();
+    auto& value = Top();
 
     /* Compute unary operation */
     using Op = UnaryExpr::Operators;
 
     switch (ast->op)
     {
+        case Op::Keep:
+            // do nothing
+            break;
         case Op::Negate:
             value.Negate();
             break;
@@ -119,9 +122,6 @@ void Computer::VisitUnaryExpr(UnaryExpr* ast, void* args)
             value.Normalize();
             break;
     }
-
-    /* Push result onto stack */
-    Push(value);
 }
 
 void Computer::VisitBinaryExpr(BinaryExpr* ast, void* args)
@@ -331,6 +331,12 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         ParamCount(1);
         Push(floor(Param(0)).to_int_precision());
     }
+    else if (f == "sign")
+    {
+        ParamCount(1);
+        Visit(ast->args.front());
+        Top().Sign();
+    }
     else if (f == "rand")
     {
         ParamCount(0);
@@ -432,7 +438,7 @@ void Computer::VisitDefExpr(DefExpr* ast, void* args)
 {
     /* Compute definition value */
     Visit(ast->expr);
-    auto value = Top();
+    std::string value = Top();
 
     /* Store (beautified) result in constant */
     StoreConst(ast->ident, value);
@@ -452,7 +458,7 @@ Variable Computer::Pop()
     return val;
 }
 
-Variable Computer::Top()
+Variable& Computer::Top()
 {
     if (values_.empty())
         Error("empty stack");

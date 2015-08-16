@@ -203,6 +203,7 @@ ExprPtr Parser::ParseValueExpr()
         case Tokens::OpenBracket:
             return ParseBracketExpr();
         case Tokens::SubOp:
+        case Tokens::AddOp:
             return ParseUnaryExpr();
         case Tokens::NormOp:
             return ParseNormExpr();
@@ -265,12 +266,23 @@ ExprPtr Parser::ParseBracketExpr()
     return ast;
 }
 
-// unary_expr: '-' value_expr;
+// unary_expr: ('-' | '+') value_expr;
 ExprPtr Parser::ParseUnaryExpr()
 {
     auto ast = Make<UnaryExpr>();
 
-    Accept(Tokens::SubOp);
+    bool isAdd = Is(Tokens::AddOp);
+    
+    if (isAdd)
+    {
+        Accept(Tokens::AddOp);
+        ast->op = UnaryExpr::Operators::Keep;
+    }
+    else
+    {
+        Accept(Tokens::SubOp);
+        ast->op = UnaryExpr::Operators::Negate;
+    }
 
     ast->expr = ParseValueExpr();
 

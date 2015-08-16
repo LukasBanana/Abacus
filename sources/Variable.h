@@ -47,6 +47,7 @@ class Variable
         void Negate();
         void Factorial();
         void Normalize();
+        void Sign();
 
         operator std::string ();
 

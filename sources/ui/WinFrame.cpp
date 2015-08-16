@@ -270,7 +270,7 @@ void WinFrame::ShowInfo()
         Info.Add("  pi                  Number pi ~ 3.14...");
         Info.Add("  e                   Euler's number e ~ 2.71...");
         Info.Add("");
-        Info.Add("Basic Functions:");
+        Info.Add("Scalar Functions:");
         Info.Add("  sin(X)              Sine of X");
         Info.Add("  cos(X)              Cosine of X");
         Info.Add("  tan(X)              Tangent of X");
@@ -292,6 +292,7 @@ void WinFrame::ShowInfo()
         Info.Add("  abs(X)              Absolute value of X");
         Info.Add("  ceil(X)             Rounds X upward");
         Info.Add("  floor(X)            Rounds X downward");
+        Info.Add("  sign(X)             Signum function for X -> -1, 0, 1");
         Info.Add("  rand()              Pseudo random number in [0, 1]");
         Info.Add("  min(X1, ..., Xn)    Minimum of all values");
         Info.Add("  max(X1, ..., Xn)    Maximum of all values");
@@ -299,6 +300,13 @@ void WinFrame::ShowInfo()
         Info.Add("Fold Functions:");
         Info.Add("  sum[X=I, N] E       Sums expression E with index variable X from I to N");
         Info.Add("  product[X=I, N] E   Mutliplies expression E with index variable X from I to N");
+        Info.Add("");
+        Info.Add("Vector Functions:");
+        Info.Add("  dot(A, B)           dot (or scalar-) product of vector A and B");
+        Info.Add("  cross(A, B)         cross (or vector-) product of vector A and B");
+        Info.Add("  dist(A, B)          distance between origin-vector A and B");
+        Info.Add("  angle(A, B)         angle between vector A and B: acos(dot(A, B))");
+        Info.Add("  normalize(X)        normalized vector X: X/|X|");
         Info.Add("");
         Info.Add("Special Input:");
         Info.Add("  exit                Quit application");

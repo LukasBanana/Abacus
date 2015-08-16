@@ -220,6 +220,32 @@ void Variable::Normalize()
         iprec_ = abs(iprec_);
 }
 
+void Variable::Sign()
+{
+    int sgn = 0;
+
+    /* Determine signum */
+    if (isFloat_)
+    {
+        const float_precision zero("0.0");
+        if (fprec_ > zero)
+            sgn = 1;
+        else if (fprec_ < zero)
+            sgn = -1;
+    }
+    else
+    {
+        if (iprec_ > 0)
+            sgn = 1;
+        else if (iprec_ < 0)
+            sgn = -1;
+    }
+
+    /* Store integer value */
+    ToInt();
+    iprec_ = sgn;
+}
+
 Variable::operator std::string ()
 {
     return isFloat_ ? fprec_.toString() : iprec_.toString();

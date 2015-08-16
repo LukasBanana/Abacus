@@ -33,7 +33,7 @@ norm_expr:			'|' expr '|';
 ident_expr:			IDENT;
 literal_expr:		INT_LITERAL | FLOAT_LITERAL;
 bracket_expr:		'(' expr ')';
-unary_expr:			'-' value_expr;
+unary_expr:			('-' | '+') value_expr;
 func_expr:			IDENT (argument_list | mul_expr);
 vector_expr:		'[' expr_list ']';
 
