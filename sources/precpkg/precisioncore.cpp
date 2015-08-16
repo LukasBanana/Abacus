@@ -160,7 +160,7 @@ std::istream& operator>>( std::istream& strm, int_precision& d )
 ///   Convert int_precsion to ascii string
 ///   Based on RADIX convertion from RADIX to BASE_10
 //
-std::string _int_precision_itoa( int_precision *a )
+std::string _int_precision_itoa( const int_precision *a )
    {
    return _int_precision_itoa( a->pointer() );
    }

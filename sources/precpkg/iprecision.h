@@ -215,7 +215,7 @@ std::string _int_precision_uand( std::string *, std::string *);
 int _int_precision_compare( std::string *, std::string * );
 void _int_precision_strip_leading_zeros( std::string * );
 std::string _int_precision_itoa( const std::string * );
-std::string _int_precision_itoa( int_precision * );
+std::string _int_precision_itoa( const int_precision * );
 std::string _int_precision_atoi( const char *str );
 std::string itostring( int, const unsigned );
 std::string ito_precision_string( unsigned long, const bool, const int base = RADIX );
@@ -256,9 +256,10 @@ class int_precision
 
          
       // Coordinate functions
-      std::string copy() const   { return mNumber; }
-      std::string *pointer()     { return &mNumber; }
-      int sign() const           { return CHAR_SIGN( mNumber[0] ); }                    
+      std::string copy() const              { return mNumber; }
+      std::string *pointer()                { return &mNumber; }
+      const std::string *pointer() const    { return &mNumber; }
+      int sign() const                      { return CHAR_SIGN( mNumber[0] ); }                    
       int change_sign()          { // Change and return sign   
                                  if( mNumber.length() != 2 || IDIGIT( mNumber[1] ) != 0 ) // Don't change sign for +0!
                                     if( mNumber[0] == '+' ) mNumber[0] = '-'; else mNumber[0] = '+';
@@ -267,7 +268,7 @@ class int_precision
       int size() const           { return mNumber.length(); } // Return number of digits including the sign
 
 	  // Conversion methods. Safer and less ambiguios than overloading implicit/explivit conversion operators
-      std::string toString()	{ return _int_precision_itoa(this); }
+      std::string toString() const	{ return _int_precision_itoa(this); }
  
 	  // Implict/explicit conversion operators
 	  operator long() const;
