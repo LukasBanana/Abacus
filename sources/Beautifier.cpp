@@ -20,9 +20,13 @@ void BeautifyLiteral(std::string& s, std::size_t maxExp)
     if (s.empty())
         return;
 
-    /* Remove pre-fix '+' */
+    /* Check and adjust sign */
+    std::size_t signChars = 0;
+
     if (s.front() == '+')
         s.erase(s.begin());
+    else if (s.front() == '-')
+        signChars = 1;
 
     /* Find 'E' */
     auto posE = s.find('E');
@@ -73,19 +77,19 @@ void BeautifyLiteral(std::string& s, std::size_t maxExp)
                 while (exp < 0)
                 {
                     /* Move '.' left */
-                    if (posDot > 1)
+                    if (posDot > 1 + signChars)
                     {
                         std::swap(s[posDot - 1], s[posDot]);
                         --posDot;
                     }
-                    else if (posDot == 1)
+                    else if (posDot == 1 + signChars)
                     {
-                        std::swap(s[0], s[1]);
-                        s.insert(s.begin(), '0');
+                        std::swap(s[posDot - 1], s[posDot]);
+                        s.insert(s.begin() + signChars, '0');
                         --posDot;
                     }
                     else
-                        s.insert(s.begin() + 2, '0');
+                        s.insert(s.begin() + 2 + signChars, '0');
 
                     ++exp;
                 }
