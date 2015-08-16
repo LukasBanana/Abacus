@@ -298,7 +298,7 @@ ExprPtr Parser::ParseIdentExpr()
 
     if (!Is(Tokens::OpenBracket))
     {
-        if (Is(Tokens::Ident) || Is(Tokens::FloatLiteral) || Is(Tokens::IntLiteral))
+        if (Is(Tokens::Ident) || Is(Tokens::FloatLiteral) || Is(Tokens::IntLiteral) || Is(Tokens::OpenParen))
         {
             /* Create function expression */
             return ParseFuncExpr(std::move(value), true);
