@@ -51,9 +51,9 @@ class Input : public wxTextCtrl
         
         long ClampPos(long pos) const;
 
-        void MoveCursorLeft(bool shift);
-        void MoveCursorRight(bool shift);
-        void LocateCursor(long pos, bool shift);
+        void MoveCursorLeft(bool shift = false);
+        void MoveCursorRight(bool shift = false);
+        void LocateCursor(long pos, bool shift = false);
         
         void Insert(char chr);
         void Insert(const wxString& str);
@@ -64,6 +64,7 @@ class Input : public wxTextCtrl
         void HistoryNext();
 
         std::pair<long, long> GetSelectionRange() const;
+        bool IsSelected() const;
         bool IsAllSelected() const;
         void SwitchSelectAll();
 
@@ -71,7 +72,10 @@ class Input : public wxTextCtrl
 
         void OnChar(wxKeyEvent& event);
 
-        wxTextPos   selStart_ = 0l;
+        wxTextPos GetCursorPos() const;
+
+        wxTextPos   selStart_   = 0l;
+        wxTextPos   cursorPos_  = 0l;
         Callback    callback_;
 
         HistoryType history_;

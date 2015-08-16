@@ -52,14 +52,14 @@ Input::Input(wxWindow* parent, const wxPoint& pos, const wxSize& size, const wxF
 void Input::Replace(std::string s)
 {
     /* Get previous insertion position */
-    auto pos = GetInsertionPoint();
+    auto pos = GetCursorPos();
     
     /* Set new text input */
     AdjustExprIn(s);
     SetValue(s);
 
     /* Reset insertion position */
-    SetInsertionPoint(ClampPos(pos));
+    LocateCursor(pos);
 }
 
 void Input::Cut()
@@ -109,69 +109,52 @@ long Input::ClampPos(long pos) const
     return std::max(0l, std::min(pos, GetLastPosition()));
 }
 
+wxTextPos Input::GetCursorPos() const
+{
+    return IsSelected() ? cursorPos_ : GetInsertionPoint();
+}
+
 void Input::MoveCursorLeft(bool shift)
 {
-    auto pos = std::max(GetInsertionPoint() - 1l, 0l);
+    cursorPos_ = std::max(0l, GetCursorPos() - 1l);
     
-    /* Get previous selection */
-    long from, to;
-    GetSelection(&from, &to);
-
-    /* Set new insertion position */
-    if (from == to)
-        selStart_ = to;
-    else
-        pos = from;
-
-    SetInsertionPoint(pos);
-    selStart_ = pos;
-
-    /* Update selection */
     if (shift)
-        SetSelection(std::max(from - 1l, 0l), to);
+        SetSelection(cursorPos_, selStart_);
+    else
+    {
+        SetInsertionPoint(cursorPos_);
+        selStart_ = cursorPos_;
+    }
 }
 
 void Input::MoveCursorRight(bool shift)
 {
-    auto pos = std::min(GetInsertionPoint() + 1l, GetLastPosition());
+    cursorPos_ = std::min(GetCursorPos() + 1l, GetLastPosition());
 
-    /* Get previous selection */
-    long from, to;
-    GetSelection(&from, &to);
-
-    /* Set new insertion position */
-    if (from == to)
-        selStart_ = from;
-    else
-        pos = to;
-
-    SetInsertionPoint(pos);
-    selStart_ = pos;
-
-    /* Update selection */
     if (shift)
-        SetSelection(from, std::min(to + 1l, GetLastPosition()));
+        SetSelection(selStart_, cursorPos_);
+    else
+    {
+        SetInsertionPoint(cursorPos_);
+        selStart_ = cursorPos_;
+    }
 }
 
 void Input::LocateCursor(long pos, bool shift)
 {
-    pos = ClampPos(pos);
-
-    /* Get previous selection */
-    long from, to;
-    GetSelection(&from, &to);
+    cursorPos_ = ClampPos(pos);
 
     if (shift)
     {
-        if (selStart_ < pos)
-            SetSelection(selStart_, pos);
+        if (selStart_ < cursorPos_)
+            SetSelection(selStart_, cursorPos_);
         else
-            SetSelection(pos, selStart_);
+            SetSelection(cursorPos_, selStart_);
     }
     else
     {
-        SetInsertionPoint(pos);
-        selStart_ = pos;
+        SetInsertionPoint(cursorPos_);
+        selStart_ = cursorPos_;
     }
 }
 
@@ -197,8 +180,8 @@ void Input::Erase(long dir)
         Remove(from, to);
     else
     {
-        auto pos = GetInsertionPoint();
-    
+        auto pos = GetCursorPos();
+        
         if (dir < 0 && pos > 0)
             Remove(std::max(0l, pos + dir), pos);
         else if (dir > 0 && pos < GetLastPosition())
@@ -253,6 +236,12 @@ std::pair<long, long> Input::GetSelectionRange() const
     return { from, to };
 }
 
+bool Input::IsSelected() const
+{
+    auto range = GetSelectionRange();
+    return range.first != range.second;
+}
+
 bool Input::IsAllSelected() const
 {
     auto range = GetSelectionRange();
@@ -264,7 +253,7 @@ void Input::SwitchSelectAll()
     if (IsAllSelected())
     {
         SelectNone();
-        SetInsertionPoint(selStart_);
+        LocateCursor(selStart_);
     }
     else
         SelectAll();
