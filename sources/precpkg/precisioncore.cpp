@@ -1403,17 +1403,19 @@ int_precision abs(const int_precision& x)
 /// Return the integer power of x^y. For any pratical purpose the power y is restricted to 2^32-1
 //
 int_precision ipow( const int_precision& x, const int_precision& y )
-   {
-   int_precision p(x);
-   int_precision r(1);
+{
+    int_precision p(x);
+    int_precision r(1);
+    const int_precision zero(0);
+    const int_precision one(0x1);
 
-   for(int n = y; n > 0; n >>= 1) 
-        {
-        if( ( n & 0x1 ) != 0 ) r *= p;  // Odd
-        p *= p;						 
-        }
-   return r;
-   }
+    for(int_precision n = y; n > 0; n >>= 1) 
+    {
+        if( ( n & one ) != zero ) r *= p;  // Odd
+        p *= p;
+    }
+    return r;
+}
 
 ///	@author Henrik Vestermark (hve@hvks.com)
 ///	@date  8/24/2012

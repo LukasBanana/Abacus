@@ -291,7 +291,7 @@ class int_precision
       int_precision& operator%=( const int_precision& );
       int_precision& operator>>=( const int_precision& );
       int_precision& operator<<=( const int_precision& );
-	 // int_precision& operator&=( const int_precision& );
+	  int_precision& operator&=( const int_precision& );
      // int_precision& operator|=( const int_precision& );
 	 // int_precision& operator^=( const int_precision& );
 	 //
@@ -1069,7 +1069,7 @@ inline int_precision& int_precision::operator>>=( const int_precision& a )
    
    return *this;
    }
-/*
+
 ///	@author Henrik Vestermark (hve@hvks.com)
 ///	@date  2-Sep/2012
 ///	@brief 	operator&=
@@ -1100,7 +1100,7 @@ inline int_precision& int_precision::operator&=( const int_precision& a )
 
    return *this;
    }
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1469,7 +1469,6 @@ template <class _Ty> inline int_precision operator>>( const _Ty& lhs, const int_
    return int_precision(lhs) >>= rhs; 
    }
 
-/*
 ///	@author Henrik Vestermark (hve@hvks.com)
 ///	@date  2-Sep/2012
 ///	@brief 			operator&
@@ -1504,7 +1503,6 @@ template <class _Ty> inline int_precision operator&( const _Ty& lhs, const int_p
    {
    return int_precision(lhs) &= rhs; 
    }
-*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
