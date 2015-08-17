@@ -124,6 +124,8 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constan
         LogError(log, "base error");
     }
 
+    ClearTempConsts();
+
     return "";
 }
 
@@ -464,6 +466,9 @@ void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
     if (initVal.IsFloat() || iterVal.IsFloat())
         Error("fold function '" + ast->func + "' can only have discrete iterations");
 
+    /* Register temporary index variable */
+    PushTempConst(ast->index);
+
     /* Fold loop expression */
     auto idx = initVal.GetInt();
     auto idxEnd = iterVal.GetInt();
@@ -515,6 +520,9 @@ void Computer::VisitFoldExpr(FoldExpr* ast, void* args)
             }
         }
     }
+
+    /* Unregister temporary index variable */
+    PopTempConst();
 
     /* Return result */
     Push(result);
@@ -570,12 +578,35 @@ void Computer::StoreConst(const std::string& ident, std::string value)
     constantsSet_->constants[ident] = value;
 }
 
-void Computer::AddIndexVar(const std::string& ident)
+void Computer::PushTempConst(const std::string& ident)
 {
+    const auto& constList = constantsSet_->constants;
+
+    /* Check if identifier is already a registered constant */
+    if (constList.find(ident) != constList.end())
+        Error("index variable '" + ident + "' already defined in this scope");
+
+    /* Push onto stack of temporary constants */
+    tempConsts_.push(ident);
 }
 
-void Computer::RemoveIndexVar(const std::string& ident)
+void Computer::PopTempConst()
 {
+    auto& constList = constantsSet_->constants;
+    
+    /* Remove from constant list */
+    auto it = constList.find(tempConsts_.top());
+    if (it != constList.end())
+        constList.erase(it);
+
+    /* Pop from stack of temporary constants */
+    tempConsts_.pop();
+}
+
+void Computer::ClearTempConsts()
+{
+    while (!tempConsts_.empty())
+        PopTempConst();
 }
 
 

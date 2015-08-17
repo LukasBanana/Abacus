@@ -48,11 +48,14 @@ class Computer : private Visitor
 
         void StoreConst(const std::string& ident, std::string value);
 
-        void AddIndexVar(const std::string& ident);
-        void RemoveIndexVar(const std::string& ident);
+        void PushTempConst(const std::string& ident);
+        void PopTempConst();
+        void ClearTempConsts();
 
         std::stack<Variable>    values_;
         ConstantsSet*           constantsSet_;
+
+        std::stack<std::string> tempConsts_;
 
 };
 
