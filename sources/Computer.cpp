@@ -49,6 +49,24 @@ static std::string AdjustResult(const Variable& result)
     return s;
 }
 
+static bool FuncFilter(const std::string& ident)
+{
+    static const char* funcNames[] =
+    {
+        "sin", "cos", "tan", "sinh", "cosh", "tanh", "asin", "acos", "atan", "asinh", "acosh", "atanh",
+        "pow", "sqrt", "exp", "log", "log10", "abs", "ceil", "floor", "sign", "rand", "min", "max", "norm",
+        nullptr
+    };
+
+    for (auto names = funcNames; *names != nullptr; ++names)
+    {
+        if (ident == *names)
+            return true;
+    }
+
+    return false;
+}
+
 std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log)
 {
     /* Setup constant set */
@@ -57,7 +75,7 @@ std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constan
     try
     {
         /* Parse expression stream */
-        auto ast = ParseExpression(expr, log);
+        auto ast = ParseExpression(expr, log, FuncFilter);
         if (ast)
         {
             /* Compute AST and return (beautified) result */
@@ -550,6 +568,14 @@ void Computer::StoreConst(const std::string& ident, std::string value)
 {
     BeautifyLiteral(value);
     constantsSet_->constants[ident] = value;
+}
+
+void Computer::AddIndexVar(const std::string& ident)
+{
+}
+
+void Computer::RemoveIndexVar(const std::string& ident)
+{
 }
 
 

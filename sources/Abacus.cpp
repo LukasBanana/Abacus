@@ -16,7 +16,7 @@ namespace Ac
 {
 
 
-AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log)
+AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log, const FunctionFilter& funcFilter)
 {
     /* Setup input stream */
     auto stream = std::make_shared<std::stringstream>();
@@ -24,7 +24,7 @@ AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log)
 
     /* Parse expression */
     Parser parser(log);
-    return parser.Parse(std::make_shared<ExprStream>(stream));
+    return parser.Parse(std::make_shared<ExprStream>(stream), funcFilter);
 }
 
 static std::string ComputeIntern(const std::string& expr, ConstantsSet* constantsSet, Log* log)

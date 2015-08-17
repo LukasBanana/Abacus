@@ -18,15 +18,20 @@ Parser::Parser(Log* errHandler) :
 {
 }
 
-std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
+std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream, const FunctionFilter& funcFilter)
 {
+    /* Initialize scanner with character stream */
     if (!scanner_.Scan(stream))
         return nullptr;
 
+    /* Always accept first token to start parsing process */
     AcceptIt();
+
+    funcFilter_ = funcFilter;
 
     try
     {
+        /* Parse expression and build AST */
         auto ast = Parse();
         
         if (!scanner_.HasSucceeded())
@@ -53,6 +58,11 @@ std::shared_ptr<Expr> Parser::Parse(const std::shared_ptr<ExprStream>& stream)
 std::string Parser::GetContextInfo() const
 {
     return "syntax";
+}
+
+bool Parser::IsFuncIdent(const std::string& ident) const
+{
+    return funcFilter_ != nullptr && funcFilter_(ident);
 }
 
 void Parser::ErrorUnexpected()
@@ -298,7 +308,7 @@ ExprPtr Parser::ParseIdentExpr()
 
     if (!Is(Tokens::OpenBracket))
     {
-        if (Is(Tokens::Ident) || Is(Tokens::FloatLiteral) || Is(Tokens::IntLiteral) || Is(Tokens::OpenParen))
+        if (IsFuncIdent(value) || Is(Tokens::Ident) || Is(Tokens::FloatLiteral) || Is(Tokens::IntLiteral) || Is(Tokens::OpenParen))
         {
             /* Create function expression */
             return ParseFuncExpr(std::move(value), true);
@@ -380,6 +390,9 @@ ExprPtr Parser::ParseFuncExpr(std::string&& name, bool singleParam)
     auto ast = Make<FuncExpr>();
 
     ast->name = name;
+
+    if (Is(Tokens::Equal))
+        Error("can not assign value to function name");
 
     if (!singleParam)
     {

@@ -27,9 +27,7 @@ class Computer : private Visitor
     
     public:
         
-        std::string ComputeExpr(
-            const std::string& expr, ConstantsSet& constantsSet, Log* log = nullptr
-        );
+        std::string ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log = nullptr);
 
     private:
         
@@ -49,6 +47,9 @@ class Computer : private Visitor
         Variable& Top();
 
         void StoreConst(const std::string& ident, std::string value);
+
+        void AddIndexVar(const std::string& ident);
+        void RemoveIndexVar(const std::string& ident);
 
         std::stack<Variable>    values_;
         ConstantsSet*           constantsSet_;

@@ -33,7 +33,7 @@ class Parser : public ExprProcessor
         
         Parser(Log* errHandler = nullptr);
 
-        std::shared_ptr<Expr> Parse(const std::shared_ptr<ExprStream>& stream);
+        std::shared_ptr<Expr> Parse(const std::shared_ptr<ExprStream>& stream, const FunctionFilter& funcFilter = nullptr);
 
     private:
         
@@ -51,6 +51,9 @@ class Parser : public ExprProcessor
         /* === Functions === */
 
         std::string GetContextInfo() const override;
+
+        //! Returns true, if the specified identifier denotes a pre-defined function.
+        bool IsFuncIdent(const std::string& ident) const;
 
         void ErrorUnexpected();
 
@@ -125,8 +128,10 @@ class Parser : public ExprProcessor
 
         /* === Members === */
 
-        Scanner     scanner_;
-        TokenPtr    tkn_;
+        Scanner         scanner_;
+        TokenPtr        tkn_;
+
+        FunctionFilter  funcFilter_;
 
 };
 

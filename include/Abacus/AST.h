@@ -16,11 +16,19 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <functional>
 
 
 namespace Ac
 {
 
+
+/**
+Function filter callback signature.
+\param[in] ident Specifies the identifier of the potential function.
+\return True if the specified identifier denotes a function, otherwise false.
+*/
+using FunctionFilter = std::function<bool(const std::string& ident)>;
 
 #define __AC_AST_INTERFACE__(name)                              \
     name##Expr(const StreamPosition& pos) :                     \
