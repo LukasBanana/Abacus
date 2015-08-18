@@ -9,9 +9,7 @@ License
 Status
 ------
 
-**Alpha**
-
-Todo: Small UI with Qt or wxWidgets
+**Beta**
 
 Dependencies
 ------------
