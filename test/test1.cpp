@@ -138,12 +138,13 @@ int main()
     std::cout << std::endl << "constants:" << std::endl << "----------" << std::endl;
 
     ConstantsSet constants;
+    ComputeMode mode;
 
     SetFloatPrecision(50);
     
-    Compute("x = 2", constants, &log);
-    Compute("y = -123.456", constants, &log);
-    Compute("z = 5.1", constants, &log);
+    Compute("x = 2", mode, constants, &log);
+    Compute("y = -123.456", mode, constants, &log);
+    Compute("z = 5.1", mode, constants, &log);
 
     for (const auto& c : constants.constants)
         std::cout << c.first << " = " << c.second << std::endl;
@@ -151,15 +152,15 @@ int main()
     // compute test
     std::cout << std::endl << "computing:" << std::endl << "----------" << std::endl;
 
-    std::cout << expr << " = " << Compute(expr, constants, &log) << std::endl;
+    std::cout << expr << " = " << Compute(expr, mode, constants, &log) << std::endl;
 
     // variable test
     std::cout << std::endl << "variables:" << std::endl << "----------" << std::endl;
 
     for (int i = 0; i < 10; ++i)
     {
-        Compute("x = x+1", constants, &log);
-        std::cout << "x = " << Compute("x", constants, &log) << std::endl;
+        Compute("x = x+1", mode, constants, &log);
+        std::cout << "x = " << Compute("x", mode, constants, &log) << std::endl;
     }
 
     #ifdef _WIN32

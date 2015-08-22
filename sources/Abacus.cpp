@@ -27,23 +27,23 @@ AC_EXPORT ExprPtr ParseExpression(const std::string& expr, Log* log, const Funct
     return parser.Parse(std::make_shared<ExprStream>(stream), funcFilter);
 }
 
-static std::string ComputeIntern(const std::string& expr, ConstantsSet* constantsSet, Log* log)
+static std::string ComputeIntern(const std::string& expr, const ComputeMode& mode, ConstantsSet* constantsSet, Log* log)
 {
     /* Compute expression */
     Computer comp;
     ConstantsSet tempConstSet;
 
-    return comp.ComputeExpr(expr, (constantsSet != nullptr ? *constantsSet : tempConstSet), log);
+    return comp.ComputeExpr(expr, mode, (constantsSet != nullptr ? *constantsSet : tempConstSet), log);
 }
 
-AC_EXPORT std::string Compute(const std::string& expr, Log* log)
+AC_EXPORT std::string Compute(const std::string& expr, const ComputeMode& mode, Log* log)
 {
-    return ComputeIntern(expr, nullptr, log);
+    return ComputeIntern(expr, mode, nullptr, log);
 }
 
-AC_EXPORT std::string Compute(const std::string& expr, ConstantsSet& constantsSet, Log* log)
+AC_EXPORT std::string Compute(const std::string& expr, const ComputeMode& mode, ConstantsSet& constantsSet, Log* log)
 {
-    return ComputeIntern(expr, &constantsSet, log);
+    return ComputeIntern(expr, mode, &constantsSet, log);
 }
 
 AC_EXPORT unsigned int GetFloatPrecision()

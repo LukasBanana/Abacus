@@ -67,10 +67,11 @@ static bool FuncFilter(const std::string& ident)
     return false;
 }
 
-std::string Computer::ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log)
+std::string Computer::ComputeExpr(const std::string& expr, const ComputeMode& mode, ConstantsSet& constantsSet, Log* log)
 {
     /* Setup constant set */
-    constantsSet_ = &constantsSet;
+    mode_           = mode;
+    constantsSet_   = &constantsSet;
 
     try
     {
@@ -285,20 +286,30 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
         return val;
     };
 
+    auto Deg2Rad = [&](const float_precision& x) -> float_precision
+    {
+        return mode_.degree ? (x * _float_table(_PI, GetFloatPrecision()) / float_precision(180.0)) : x;
+    };
+
+    auto Rad2Deg = [&](const float_precision& x) -> float_precision
+    {
+        return mode_.degree ? (x * float_precision(180.0) / _float_table(_PI, GetFloatPrecision())) : x;
+    };
+
     if (f == "sin")
     {
         ParamCount(1);
-        Push(sin(Param(0)));
+        Push(sin(Deg2Rad(Param(0))));
     }
     else if (f == "cos")
     {
         ParamCount(1);
-        Push(cos(Param(0)));
+        Push(cos(Deg2Rad(Param(0))));
     }
     else if (f == "tan")
     {
         ParamCount(1);
-        Push(tan(Param(0)));
+        Push(tan(Deg2Rad(Param(0))));
     }
     else if (f == "sinh")
     {
@@ -318,22 +329,22 @@ void Computer::VisitFuncExpr(FuncExpr* ast, void* args)
     else if (f == "asin")
     {
         ParamCount(1);
-        Push(asin(Param(0)));
+        Push(Rad2Deg(asin(Param(0))));
     }
     else if (f == "acos")
     {
         ParamCount(1);
-        Push(acos(Param(0)));
+        Push(Rad2Deg(acos(Param(0))));
     }
     else if (f == "atan")
     {
         ParamCount(1);
-        Push(atan(Param(0)));
+        Push(Rad2Deg(atan(Param(0))));
     }
     else if (f == "atan2")
     {
         ParamCount(2);
-        Push(atan2(Param(0), Param(1)));
+        Push(Rad2Deg(atan2(Param(0), Param(1))));
     }
     else if (f == "asinh")
     {

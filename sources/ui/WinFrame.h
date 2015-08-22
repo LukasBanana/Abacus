@@ -15,7 +15,11 @@
 #include <wx/textctrl.h>
 #include <wx/font.h>
 #include <wx/statusbr.h>
+#include <wx/menu.h>
+#include <wx/menuitem.h>
+
 #include <Abacus/Abacus.h>
+
 #include <functional>
 #include <thread>
 #include <string>
@@ -37,11 +41,18 @@ class WinFrame : public wxFrame
 
         void Finalize();
 
+    protected:
+
+        void OnMenuItem(wxCommandEvent& event);
+
+        DECLARE_EVENT_TABLE()
+
     private:
         
         void CreateFont();
         void CreateInputCtrl();
         void CreateOutputCtrl();
+        void CreateMenuItems();
         void CreateStatBar();
 
         long GetStyle() const;
@@ -51,14 +62,18 @@ class WinFrame : public wxFrame
 
         void SetInput(const std::string& in);
 
-        void ShowInfo();
+        bool GetOptionDegree();
+        void SetOptionDegree(bool enable);
+
+        void ShowAbout();
+        void ShowIntro();
         void ShowDemo();
         void ShowConstants();
 
         void OnClose(wxCloseEvent& event);
         void OnResize(wxSizeEvent& event);
 
-        void ComputeThreadProc(const std::string& expr);
+        void ComputeThreadProc(const std::string& expr, const Ac::ComputeMode& mode);
 
         #ifdef AC_MULTI_THREADED
         void JoinThread();
@@ -72,7 +87,7 @@ class WinFrame : public wxFrame
 
         Input*                          inCtrl_     = nullptr;
         wxTextCtrl*                     outCtrl_    = nullptr;
-
+        wxMenuBar*                      menuBar_    = nullptr;
         wxStatusBar*                    statusBar_  = nullptr;
 
         Ac::ConstantsSet                constantsSet_;

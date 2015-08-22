@@ -27,7 +27,7 @@ class Computer : private Visitor
     
     public:
         
-        std::string ComputeExpr(const std::string& expr, ConstantsSet& constantsSet, Log* log = nullptr);
+        std::string ComputeExpr(const std::string& expr, const ComputeMode& mode, ConstantsSet& constantsSet, Log* log = nullptr);
 
     private:
         
@@ -53,9 +53,10 @@ class Computer : private Visitor
         void ClearTempConsts();
 
         std::stack<Variable>    values_;
-        ConstantsSet*           constantsSet_;
-
         std::stack<std::string> tempConsts_;
+
+        ComputeMode             mode_;
+        ConstantsSet*           constantsSet_;
 
 };
 

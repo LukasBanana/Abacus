@@ -18,6 +18,10 @@
 #include <sstream>
 
 
+/*
+ * Internals
+ */
+
 static const std::string configFilename = "abacus-config.ini";
 
 class ErrorCollector : public Ac::Log
@@ -46,6 +50,34 @@ class ErrorCollector : public Ac::Log
 
 };
 
+enum MenuItem
+{
+    MENU_QUIT,
+
+    MENU_RADIAN,
+    MENU_DEGREE,
+
+    MENU_INTRO,
+    MENU_DEMO,
+    MENU_INFO,
+};
+
+BEGIN_EVENT_TABLE(WinFrame, wxFrame)
+    EVT_MENU( MENU_QUIT,    WinFrame::OnMenuItem )
+    
+    EVT_MENU( MENU_RADIAN,  WinFrame::OnMenuItem )
+    EVT_MENU( MENU_DEGREE,  WinFrame::OnMenuItem )
+
+    EVT_MENU( MENU_INTRO,   WinFrame::OnMenuItem )
+    EVT_MENU( MENU_DEMO,    WinFrame::OnMenuItem )
+    EVT_MENU( MENU_INFO,    WinFrame::OnMenuItem )
+END_EVENT_TABLE()
+
+
+/*
+ * WinFrame class
+ */
+
 WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size) :
     wxFrame( nullptr, wxID_ANY, title, pos, size, GetStyle() )
 {
@@ -64,6 +96,7 @@ WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size
     CreateFont();
     CreateInputCtrl();
     CreateOutputCtrl();
+    CreateMenuItems();
 
     SetMinClientSize(wxSize(300, 100));
 
@@ -72,18 +105,18 @@ WinFrame::WinFrame(const wxString& title, const wxPoint& pos, const wxSize& size
 
     Centre();
 
-    ShowInfo();
+    ShowIntro();
 
     LoadConfig(configFilename);
 }
 
-void WinFrame::ComputeThreadProc(const std::string& expr)
+void WinFrame::ComputeThreadProc(const std::string& expr, const Ac::ComputeMode& mode)
 {
     constantsSet_.ResetStd();
 
     /* Compute math expression */
     ErrorCollector errHandler;
-    auto result = Ac::Compute(expr, constantsSet_, &errHandler);
+    auto result = Ac::Compute(expr, mode, constantsSet_, &errHandler);
 
     /* Output result */
     if (errHandler.HasErrors())
@@ -105,7 +138,7 @@ bool WinFrame::ExecExpr(const std::string& expr)
 {
     /* If expression is empty -> show information */
     if (expr.empty())
-        ShowInfo();
+        ShowIntro();
     else if (expr == "exit")
     {
         /* Clear input to avoid storing "exit" in the config-file */
@@ -124,6 +157,10 @@ bool WinFrame::ExecExpr(const std::string& expr)
     }
     else
     {
+        /* Setup compute mode */
+        Ac::ComputeMode mode;
+        mode.degree = GetOptionDegree();
+
         /* Show status message */
         SetOutput("computing ...");
 
@@ -140,11 +177,11 @@ bool WinFrame::ExecExpr(const std::string& expr)
         #ifdef AC_MULTI_THREADED
 
         computing_ = true;
-        thread_ = std::unique_ptr<std::thread>(new std::thread(&WinFrame::ComputeThreadProc, this, expr));
+        thread_ = std::unique_ptr<std::thread>(new std::thread(&WinFrame::ComputeThreadProc, this, expr, mode));
     
         #else
     
-        ComputeThreadProc(expr.ToStdString());
+        ComputeThreadProc(expr.ToStdString(), mode);
     
         #endif
     }
@@ -221,6 +258,38 @@ void WinFrame::CreateOutputCtrl()
     outCtrl_->SetFont(*stdFont_);
 }
 
+void WinFrame::CreateMenuItems()
+{
+    menuBar_ = new wxMenuBar;
+
+    /* Create main menu */
+    auto menuMain = new wxMenu;
+    {
+        menuMain->Append(MENU_QUIT, "&Quit", "Quits the applications");
+    }
+    menuBar_->Append(menuMain, "&Main");
+
+    /* Create compute mode menu */
+    auto menuMode = new wxMenu;
+    {
+        menuMode->AppendRadioItem(MENU_RADIAN, "&Radian", "Sets the compute mode to radian")->Check();
+        menuMode->AppendRadioItem(MENU_DEGREE, "&Degree", "Sets the compute mode to degree");
+    }
+    menuBar_->Append(menuMode, "&Compute Mode");
+
+    /* Create help menu */
+    auto menuHelp = new wxMenu;
+    {
+        menuHelp->Append(MENU_INTRO, "&Getting Started", "Shows a brief information with all supported functions and operations");
+        menuHelp->Append(MENU_DEMO, "Show &Demo", "Shows the next demonstration");
+        menuHelp->AppendSeparator();
+        menuHelp->Append(MENU_INFO, "&About", "Shows the application information");
+    }
+    menuBar_->Append(menuHelp, "&Help");
+
+    SetMenuBar(menuBar_);
+}
+
 void WinFrame::CreateStatBar()
 {
     statusBar_ = CreateStatusBar();
@@ -255,18 +324,32 @@ void WinFrame::SetInput(const std::string& in)
     inCtrl_->Replace(in);
 }
 
-void WinFrame::ShowInfo()
+bool WinFrame::GetOptionDegree()
+{
+    return menuBar_->GetMenu(1)->IsChecked(MENU_DEGREE);
+}
+
+void WinFrame::SetOptionDegree(bool enable)
+{
+    menuBar_->GetMenu(1)->Check(enable ? MENU_DEGREE : MENU_RADIAN, true);
+}
+
+void WinFrame::ShowAbout()
+{
+    wxMessageBox(
+        "Copyright (C) 2015  Lukas Hermanns\n\n"
+        "Licensed under the terms of the 3-Clause BSD License\n",
+        "About Abacus",
+        wxOK | wxCENTRE | wxICON_INFORMATION,
+        this
+    );
+}
+
+void WinFrame::ShowIntro()
 {
     /* Startup text */
     wxArrayString Info;
     {
-        Info.Add("Abacus Calculator");
-        Info.Add("");
-        Info.Add("Copyright (C) 2015  Lukas Hermanns");
-        Info.Add("Licensed under the terms of the 3-Clause BSD License");
-        Info.Add("");
-        Info.Add("Enter arithmetic expressions in the above text field");
-        Info.Add("");
         Info.Add("Operators:");
         Info.Add("  A + B               A plus B");
         Info.Add("  A - B               A minus B");
@@ -416,8 +499,34 @@ void WinFrame::OnResize(wxSizeEvent& event)
     auto clientSize = GetClientSize();
     auto posY = border*2 + textFieldSize;
 
-    inCtrl_->SetSize(wxSize(clientSize.GetWidth() - border*2, textFieldSize));
-    outCtrl_->SetSize(wxSize(clientSize.GetWidth() - border*2, clientSize.GetHeight() - posY - border));
+    inCtrl_->SetSize(wxSize(
+        clientSize.GetWidth() - border*2,
+        textFieldSize
+    ));
+
+    outCtrl_->SetSize(wxSize(
+        clientSize.GetWidth() - border*2,
+        clientSize.GetHeight() - posY - border
+    ));
+}
+
+void WinFrame::OnMenuItem(wxCommandEvent& event)
+{
+    switch (event.GetId())
+    {
+        case MENU_QUIT:
+            Close();
+            break;
+        case MENU_INTRO:
+            ShowIntro();
+            break;
+        case MENU_DEMO:
+            ShowDemo();
+            break;
+        case MENU_INFO:
+            ShowAbout();
+            break;
+    }
 }
 
 #ifdef AC_MULTI_THREADED
@@ -455,6 +564,9 @@ bool WinFrame::SaveConfig(const std::string& filename)
     /* Store last input */
     W("$input", inCtrl_->GetValue().ToStdString());
     W("$cursor", std::to_string(inCtrl_->GetInsertionPoint()));
+
+    /* Store menu entries */
+    W("$degree", GetOptionDegree() ? "yes" : "no");
 
     /* Store history */
     std::size_t historyIdx = 0;
@@ -528,6 +640,8 @@ bool WinFrame::LoadConfig(const std::string& filename)
                 SetSize(wxSize(GetSize().GetWidth(), RInt()));
             else if (ident == "$input")
                 SetInput(value);
+            else if (ident == "$degree")
+                SetOptionDegree(value == "yes");
             else if (ident == "$cursor")
                 cursorPos_ = RInt();
             else if (ident.size() > 9 && ident.substr(0, 9) == "$history_")
