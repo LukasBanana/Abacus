@@ -37,11 +37,12 @@ int main()
 {
     Log log;
     Ac::ConstantsSet constantsSet;
+    Ac::ComputeMode computeMode;
     
     Ac::SetFloatPrecision(50);
     
-    std::cout << Ac::Compute("x = 12", constantsSet, &log) << std::endl;
-    std::cout << Ac::Compute("3 + 2*(pi^-e - sqrt(log2(x*5)))", constantsSet, &log) << std::endl;
+    std::cout << Ac::Compute("x = 12", computeMode, constantsSet, &log) << std::endl;
+    std::cout << Ac::Compute("3 + 2*(pi^-e - sqrt(log2(x*5)))", computeMode, constantsSet, &log) << std::endl;
 
     return 0;
 }
